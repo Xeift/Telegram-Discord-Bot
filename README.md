@@ -51,9 +51,18 @@ Click `Copy Webhook URL` and paste the URL on notepad, Google Docs or any text e
 
 #### *TG Channel Slug*
 
+Click the title of the announcement channel, copy the slug after `https://t.me/`.
+
 ![image](https://user-images.githubusercontent.com/80938768/196020250-03ab9c6c-38b8-420c-98ff-7f34fd58cd58.png)
 
 #### *Embed Color*
+
+Google "color picker" and choose the color you like, copy its HEX value
+
+![image](https://user-images.githubusercontent.com/80938768/196021548-241e0f5c-08b3-4f45-a251-329a52917ccb.png)
+
+![image](https://user-images.githubusercontent.com/80938768/196021711-9626ec37-e4da-4dd9-9485-7d6dfefe2ef9.png)
+
 
 # GUI
 
