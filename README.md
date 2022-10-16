@@ -19,7 +19,7 @@ What's the difference between Kizmeow and other existing bots?
 Usage
 -----------------
 
-Click [here](href="/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip") to download zip first.
+Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
 
 There are two interface, GUI and CLI.
 
