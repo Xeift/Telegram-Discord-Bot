@@ -23,8 +23,15 @@ You can choose one you desire. If you're not familiar with Python, I suggest you
 
 `GUI`
 
+`CLI`
+
 
 Note
 -----------------
 
-[TTK theme I use for GUI](https://github.com/rdbende/Azure-ttk-theme)
+TTK theme I use for GUI: [Azure theme for ttk](https://github.com/rdbende/Azure-ttk-theme)
+
+Code by Xeift#1230
+
+Kizmeow icon illustrate by [Kiyue](https://www.facebook.com/profile.php?id=100026170072950)
+![貓娘頭像委託（浮水印版本）](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
