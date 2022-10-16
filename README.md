@@ -6,7 +6,7 @@ What's the different between Kizmeow and existing bots?
 
 |                                                                   | Kizmeow | Other Bots |
 |-------------------------------------------------------------------|---------|------------|
-|Not required to add Discord Bot to your server                     |   ✅    |            |
+|Not required to add Discord Bot to your server                     |   ✔    |            |
 |Not required to add Telegram Bot to your server                    |   ✅    |            |
 |Discord webhook not required                                       |         |    (✅)    |
 |Forward message from public Telegram channel which you don't own it|   ✅    |            |
