@@ -23,7 +23,18 @@ There are two interface, GUI and CLI.
 
 You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
 
+Whether you choose GUI or CLI, we need to obtain below data first:
+
+|                 | example |
+|-----------------|---------|
+| DC Webhook URL  | https://discord.com/api/webhooks/953518959309783100/nv0byOn-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
+| TG Channel Slug | ~~https://t.me/~~binance_cn |
+| Embed Color     | 0xe8006f |
+
+![image](https://user-images.githubusercontent.com/80938768/196020310-9080efb6-cf40-4480-9286-9423b8d02482.png)
+
 `GUI`
+![image](https://user-images.githubusercontent.com/80938768/196020250-03ab9c6c-38b8-420c-98ff-7f34fd58cd58.png)
 
 `CLI`
 
@@ -38,4 +49,4 @@ A nice tool I use for convert .py to .exe : [Auto PY to EXE](https://github.com/
 Code by Xeift#1230
 
 Kizmeow icon illustrate by [Kiyue](https://instagram.com/sweetdays_gun_gun?igshid=YmMyMTA2M2Y=)
-![貓娘頭像委託（浮水印版本）](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
+![image](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
