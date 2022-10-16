@@ -21,6 +21,10 @@ Usage
 
 Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
 
+If you don't want to download any file on your precious computer, you can run CLI on cloud first.
+
+[click me](https://replit.com/@xeiftc/Kizmeow-Telegram-Discord-Bot#main.py) to run CLI on Replit.
+
 There are two interface, GUI and CLI.
 
 You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
