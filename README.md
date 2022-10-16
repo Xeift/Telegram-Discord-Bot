@@ -77,7 +77,7 @@ Video Tutorial: https://www.youtube.com/watch?v=YuWAM28t8nc
 
 1. Open `CLI` folder
 2. Install python and packages in requirements.txt
-3. Run CLI.exe
+3. Run CLI.
 4. Enter data, it will start automatically
 
 Note
