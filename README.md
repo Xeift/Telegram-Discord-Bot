@@ -23,7 +23,7 @@ Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/
 
 If you don't want to download any file on your precious computer, you can run CLI on cloud first.
 
-[click me](https://replit.com/@xeiftc/Kizmeow-Telegram-Discord-Bot#main.py) to run CLI on Replit.
+[Click me](https://replit.com/@xeiftc/Kizmeow-Telegram-Discord-Bot#main.py) to run CLI on Replit.
 
 There are two interface, GUI and CLI.
 
