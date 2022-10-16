@@ -17,6 +17,8 @@ What's the different between Kizmeow and other existing bots?
 Quickstart
 -----------------
 
+Click [here](href="/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip") to download zip first.
+
 There are two interface, GUI and CLI.
 
 You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
