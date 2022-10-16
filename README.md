@@ -57,17 +57,23 @@ Click the title of the announcement channel, copy the slug after `https://t.me/`
 
 #### *Embed Color*
 
-Google "color picker" and choose the color you like, copy its HEX value
-
-![image](https://user-images.githubusercontent.com/80938768/196021548-241e0f5c-08b3-4f45-a251-329a52917ccb.png)
+Google "color picker" and choose the color you like, copy its HEX value and change "#" to "0x".
 
 ![image](https://user-images.githubusercontent.com/80938768/196021711-9626ec37-e4da-4dd9-9485-7d6dfefe2ef9.png)
 
+Finally, we get all data we need.
 
 # GUI
 
+1. Open `GUI` folder
+2. Run GUI.exe
+3. Enter data, click start bot
+
 # CLI
 
+1. Install python and packages in requirements.txt
+2. Run CLI.exe
+3. Enter data, it will start automatically
 
 Note
 -----------------
