@@ -71,6 +71,8 @@ Finally, we got all data we need.
 2. Run GUI.exe
 3. Enter data, click start bot
 
+Video Tutorial: https://www.youtube.com/watch?v=YuWAM28t8nc
+
 #### *CLI*
 
 1. Open `CLI` folder
