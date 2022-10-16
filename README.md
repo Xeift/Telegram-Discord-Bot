@@ -28,7 +28,7 @@ Whether you choose GUI or CLI, we need to obtain below data first:
 |                 | example |
 |-----------------|---------|
 | DC Webhook URL  | https://discord.com/api/webhooks/953518959309783100/nv0byOn-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
-| TG Channel Slug | ~~https://t.me/~~binance_cn |
+| TG Channel Slug | ~~https://t.me/~~ binance_cn |
 | Embed Color     | 0xe8006f |
 
 ![image](https://user-images.githubusercontent.com/80938768/196020310-9080efb6-cf40-4480-9286-9423b8d02482.png)
