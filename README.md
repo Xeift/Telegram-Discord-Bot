@@ -4,7 +4,8 @@ A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not r
 What's the different between Kizmeow and existing bots?
 -----------------
 
-|                                      | Kizmeow | Other Bots |
-|------------------------------------------|---------|------------|
-|Require to add Discord Bot to your server |         |     ✅     |
-|Require to add Telegram Bot to your server|         |     ✅     |
+|                                                                   | Kizmeow | Other Bots |
+|-------------------------------------------------------------------|---------|------------|
+|Require to add Discord Bot to your server                          |         |     ✅     |
+|Require to add Telegram Bot to your server                         |         |     ✅     |
+|Forward message from public Telegram channel which you don't own it|         |     ✅     |
