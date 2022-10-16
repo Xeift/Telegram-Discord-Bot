@@ -8,4 +8,4 @@ What's the different between Kizmeow and existing bots?
 |-------------------------------------------------------------------|---------|------------|
 |Require to add Discord Bot to your server                          |         |     ✅     |
 |Require to add Telegram Bot to your server                         |         |     ✅     |
-|Forward message from public Telegram channel which you don't own it|         |     ✅     |
+|Forward message from public Telegram channel which you don't own it|   ✅   |            |
