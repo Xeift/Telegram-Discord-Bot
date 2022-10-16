@@ -5,12 +5,8 @@ What's the different between Kizmeow and existing bots?
 -----------------
 
 | Rank | THING-TO-RANK |
-|-----:|---------------|
+|----- |---------------|
 |     1|               |
 |     2|               |
 |     3|               |
 
-| Rank | THING-TO-RANK |
-|     1|               |
-|     2|               |
-|     3|               |
