@@ -31,7 +31,7 @@ Whether you choose GUI or CLI, we need to obtain below data first:
 | TG Channel Slug | ~~https://t.me/~~ binance_cn |
 | Embed Color     | 0xe8006f |
 
-##### DC Webhook URL
+#### DC Webhook URL
 
 Right click on the Discord server you want to forward message to.
 
