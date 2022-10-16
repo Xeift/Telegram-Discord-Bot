@@ -39,6 +39,10 @@ Select `Server Settings` → `Intergration`
 
 ![image](https://user-images.githubusercontent.com/80938768/196020310-9080efb6-cf40-4480-9286-9423b8d02482.png)
 
+Click `New Webhhok` to create a new webhook.
+
+Click `Copy Webhook URL` and paste the URL on notepad, Google Docs or any text editor, we will need it later.
+
 ![image](https://user-images.githubusercontent.com/80938768/196020693-faa13f8c-7c24-46dc-936f-e0dadb8b046a.png)
 
 
