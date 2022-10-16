@@ -3,7 +3,7 @@ A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not r
 
 The bot is currently under development, it only forward text messages now. 
 
-What's the different between Kizmeow and other existing bots?
+What's the difference between Kizmeow and other existing bots?
 -----------------
 
 |                                                                   | Kizmeow | Other Bots |
