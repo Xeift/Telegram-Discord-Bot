@@ -14,7 +14,7 @@ What's the different between Kizmeow and other existing bots?
 |GUI and CLI supported                                              |   ✔    |    ✔❌    |
 
 
-Quickstart
+Usage
 -----------------
 
 Click [here](href="/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip") to download zip first.
