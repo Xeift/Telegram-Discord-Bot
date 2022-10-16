@@ -61,7 +61,7 @@ Google "color picker" and choose the color you like, copy its HEX value and chan
 
 ![image](https://user-images.githubusercontent.com/80938768/196021711-9626ec37-e4da-4dd9-9485-7d6dfefe2ef9.png)
 
-Finally, we get all data we need.
+Finally, we got all data we need.
 
 #### *GUI*
 
