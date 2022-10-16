@@ -1,7 +1,7 @@
 # Kizmeow-Telegram-Discord-Bot
-A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not require any Discord or Telegram permissions, nor does it require adding any bots to the group, the only thing required is the Discord webhook url.
+A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url. You can
 
-What's the different between Kizmeow and existing bots?
+What's the different between Kizmeow and other existing bots?
 -----------------
 
 |                                                                   | Kizmeow | Other Bots |
@@ -12,3 +12,13 @@ What's the different between Kizmeow and existing bots?
 |Forward message from public Telegram channel which you don't own it|   ✔    |     ❌     |
 |Forward message from private Telegram channel                      |   ❌   |     ✔     |
 |GUI and CLI supported                                              |   ✔    |    ✔❌    |
+
+
+Quickstart
+-----------------
+
+There are two interface, GUI and CLI.
+
+You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
+
+`GUI`
