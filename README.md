@@ -22,3 +22,9 @@ There are two interface, GUI and CLI.
 You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
 
 `GUI`
+
+
+Note
+-----------------
+
+[TTK theme I use for GUI](https://github.com/rdbende/Azure-ttk-theme)
