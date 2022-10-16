@@ -63,13 +63,13 @@ Google "color picker" and choose the color you like, copy its HEX value and chan
 
 Finally, we get all data we need.
 
-# GUI
+#### *GUI*
 
 1. Open `GUI` folder
 2. Run GUI.exe
 3. Enter data, click start bot
 
-# CLI
+#### *CLI*
 
 1. Install python and packages in requirements.txt
 2. Run CLI.exe
