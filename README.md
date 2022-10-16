@@ -33,6 +33,8 @@ Note
 
 TTK theme I use for GUI: [Azure theme for ttk](https://github.com/rdbende/Azure-ttk-theme)
 
+A nice tool I use for convert .py to .exe : [Auto PY to EXE](https://github.com/brentvollebregt/auto-py-to-exe)
+
 Code by Xeift#1230
 
 Kizmeow icon illustrate by [Kiyue](https://instagram.com/sweetdays_gun_gun?igshid=YmMyMTA2M2Y=)
