@@ -5,6 +5,6 @@ What's the different between Kizmeow and existing bots?
 -----------------
 
 |                                      | Kizmeow | Other Bots |
-|--------------------------------------|---------|------------|
-|Require Add Discord Bot to your server|         |     ✅     |
-
+|------------------------------------------|---------|------------|
+|Require to add Discord Bot to your server |         |     ✅     |
+|Require to add Telegram Bot to your server|         |     ✅     |
