@@ -34,6 +34,7 @@ Whether you choose GUI or CLI, we need to obtain below data first:
 ![image](https://user-images.githubusercontent.com/80938768/196020310-9080efb6-cf40-4480-9286-9423b8d02482.png)
 
 `GUI`
+
 ![image](https://user-images.githubusercontent.com/80938768/196020250-03ab9c6c-38b8-420c-98ff-7f34fd58cd58.png)
 
 `CLI`
