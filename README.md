@@ -73,9 +73,10 @@ Finally, we got all data we need.
 
 #### *CLI*
 
-1. Install python and packages in requirements.txt
-2. Run CLI.exe
-3. Enter data, it will start automatically
+1. Open `CLI` folder
+2. Install python and packages in requirements.txt
+3. Run CLI.exe
+4. Enter data, it will start automatically
 
 Note
 -----------------
