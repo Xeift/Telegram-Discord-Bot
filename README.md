@@ -25,7 +25,7 @@ There are two interface, GUI and CLI.
 
 You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
 
-The window on the left hand side is CLI, the right one is GUI.
+The window on the left side is CLI, the right one is GUI.
 
 ![image](https://user-images.githubusercontent.com/80938768/196021293-f8741207-a46c-4902-b4aa-b3f03fe467e5.png)
 
