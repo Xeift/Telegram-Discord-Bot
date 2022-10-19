@@ -13,7 +13,7 @@ announcementLog = []
 print('setup complete!')
 
 while 1:
-    # try:
+    try:
         announcementTemp = []
         
         announcementHtml = requests.get(f'https://t.me/s/{_tgAnnouncementChannel}')# tg public channel preview page
@@ -50,5 +50,5 @@ while 1:
         announcementLog = announcementTemp
         time.sleep(20)
         print('bot working')
-    # except:
-    #     pass
+    except:
+        pass
