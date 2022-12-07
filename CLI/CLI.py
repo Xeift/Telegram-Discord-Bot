@@ -34,7 +34,7 @@ while 1:
             announcementText = BeautifulSoup(announcementText, 'html.parser').get_text()# convert to bs4 object
 
             if announcementLink not in announcementLog:
-                print(f'send {announcementLink}')
+                print(f'{announcementLink}')
                 announcementTemp.append(announcementLink)
 
                 webhook = SyncWebhook.from_url(_webhookURL)
