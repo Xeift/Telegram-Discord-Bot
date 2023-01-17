@@ -70,8 +70,6 @@ while 1:
                     if announcementLog != []:
                         print(f'send {announcementLink}')
                         webhook.send(embed=embed)
-                else:
-                    print('y')
             except:
                 pass
 
