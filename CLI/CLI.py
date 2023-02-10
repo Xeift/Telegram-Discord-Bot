@@ -107,5 +107,5 @@ while 1:
         msg_temp.append(msg_link)
 
     msg_log = msg_temp
-    time.sleep(10)
+    time.sleep(20)
     print('bot working')
