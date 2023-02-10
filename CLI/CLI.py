@@ -9,74 +9,103 @@ _webhookURL = str(input('enter webhook url: '))
 _tgAnnouncementChannel = str(input('enter announcement channel slug: '))
 _embedColor = int(str(input('enter embed color (hex): ')), 16)
 _embedHyperlinkSetting = int(input('title hyperlink off/on, enter 1 or 2: '))
-announcementLog = []
 
 # I N P U T    E X A M P L E
-# _webhookURL = 'https://discord.com/api/webhooks/1064748597985423440/Iiyb5EeosAY7K1ZrPwIhdNWIeHNntPv6LBhcOtZ8RVIUTcNX3ujjvS95YydHVK3D4psH'
+# _webhookURL = 'https://discord.com/api/webhooks/1068038947608997939/erTyDBPBGmVHME4FsduQ-CURNcd10-cjQQMC6FQq0baP3TmHqrctM409SS4sTNzC1Be-'
 # _tgAnnouncementChannel = 'dsafdsfa3243'
 # _embedColor = int(('0xe8006f'), 16)
 # _embedHyperlinkSetting = 2
-# announcementLog = []
 
+msg_log = []
 print('setup complete!')
 
-announcementLog = []
+
+'''                                  F U N C T I O N S                                    '''
+def scrapeTelegramMessageBox():
+    tg_html = requests.get(f'https://t.me/s/{_tgAnnouncementChannel}') # telegram public channel preview page
+    tg_soup = BeautifulSoup(tg_html.text, 'html.parser')# bs4
+    tg_box = tg_soup.find_all('div',{'class': 'tgme_widget_message_wrap js-widget_message_wrap'}) # get each message
+    return tg_box
+
+
+def getLink(tg_box):
+    msg_link = tg_box.find_all('a', {'class':'tgme_widget_message_date'}, href=True)[0]['href'] # get msg link
+
+    return msg_link
+
+
+def getText(tg_box):
+    msg_text = tg_box.find_all('div',{'class': 'tgme_widget_message_text js-message_text'}) # get each text
+    if msg_text == []:
+        msg_text = None
+    else:
+        msg_text = re.sub( # deal with linebreak
+            '<br/>',
+            '\n',
+            str(msg_text[0])
+        )
+        msg_text = BeautifulSoup(msg_text, 'html.parser').get_text()
+    
+    return msg_text
+
+
+def getImage(tg_box):
+    msg_image = tg_box.find('a',{'class': 'tgme_widget_message_photo_wrap'},href=True)# get each img
+    if msg_image != None:
+        startIndex = msg_image['style'].find("background-image:url(\'") + 22 # parse image url
+        endIndex = msg_image['style'].find(".jpg')") + 4
+        msg_image = msg_image['style'][startIndex:endIndex]
+
+    return msg_image
+
+
+def sendMessage(msg_link, msg_text, msg_image):
+    webhook = SyncWebhook.from_url(_webhookURL)
+
+    if msg_text != None and msg_image != None:
+        if _embedHyperlinkSetting == 1:
+            embed = Embed(title='Forward From Telegram', description=msg_text, color=_embedColor)
+        elif _embedHyperlinkSetting == 2:
+            embed = Embed(title='Original Telegram Link', description=msg_text, url=msg_link, color=_embedColor)
+        embed.set_image(url=msg_image)
+
+    elif msg_text == None and msg_image != None:
+        if _embedHyperlinkSetting == 1:
+            embed = Embed(title='Forward From Telegram', color=_embedColor)
+        elif _embedHyperlinkSetting == 2:
+            embed = Embed(title='Original Telegram Link', url=msg_link, color=_embedColor)
+        embed.set_image(url=msg_image)
+
+    elif msg_text != None and msg_image == None:
+        if _embedHyperlinkSetting == 1:
+            embed = Embed(title='Forward From Telegram', description=msg_text, color=_embedColor)
+        elif _embedHyperlinkSetting == 2:
+            embed = Embed(title='Original Telegram Link', description=msg_text, url=msg_link, color=_embedColor)
+
+    else:
+        return
+
+    if msg_log != []:
+        print(f'send {msg_link}')
+        webhook.send(embed=embed)
+'''                                  F U N C T I O N S                                    '''
+
+
+msg_log = []
 while 1:
-    try:
-        announcementTemp = []
-        announcementHtml = requests.get(f'https://t.me/s/{_tgAnnouncementChannel}')# tg public channel preview page
-        announcementSoup = BeautifulSoup(announcementHtml.text, 'html.parser')# bs4
-        announcementBox = announcementSoup.find_all('div',{'class': 'tgme_widget_message_wrap js-widget_message_wrap'})# get each msg
-        
-        for a in announcementBox:
-            announcementLink = a.find_all('a',{'class':'tgme_widget_message_date'},href=True)[0]# get msg link
-            announcementLink = announcementLink['href']
-            announcementText = a.find_all('div',{'class': 'tgme_widget_message_text js-message_text'})# get each text
+    msg_temp = []
 
-            announcementImg = a.find('a',{'class': 'tgme_widget_message_photo_wrap'},href=True)# get each img
-            if announcementImg != None:
-                startIndex = announcementImg['style'].find("background-image:url(\'") + 22
-                endIndex = announcementImg['style'].find(".jpg')") + 4
-                announcementImg = announcementImg['style'][startIndex:endIndex]
-            else:
-                announcementImg = None
+    for tg_box in scrapeTelegramMessageBox():
+        msg_link = getLink(tg_box)
+        msg_text = getText(tg_box)
+        msg_image = getImage(tg_box)
 
-            try:
-                announcementText = re.sub(# deal with linebreak
-                    '<br/>',
-                    '\n',
-                    str(announcementText[0])
-                )
-                announcementText = BeautifulSoup(announcementText, 'html.parser').get_text()# convert to bs4 object
+        if msg_link not in msg_log:
+            msg_temp.append(msg_link)
+            sendMessage(msg_link, msg_text, msg_image)
 
-                if announcementLink not in announcementLog:
-                    announcementTemp.append(announcementLink)
-                    webhook = SyncWebhook.from_url(_webhookURL)
-                    
-                    if announcementText == None:
-                        if _embedHyperlinkSetting == 1:
-                            embed = Embed(title='Forward From Telegram', color=_embedColor)
-                        elif _embedHyperlinkSetting == 2:
-                            embed = Embed(title='Original Telegram Link', url=f'{announcementLink}', color=_embedColor)
-                    else:
-                        if _embedHyperlinkSetting == 1:
-                            embed = Embed(title='Forward From Telegram', description=announcementText, color=_embedColor)
-                        elif _embedHyperlinkSetting == 2:
-                            embed = Embed(title='Original Telegram Link', description=announcementText, url=f'{announcementLink}', color=_embedColor)
-                    
-                    if announcementImg != None:
-                        embed.set_image(url=announcementImg)
+        msg_temp.append(msg_link)
 
-                    if announcementLog != []:
-                        print(f'send {announcementLink}')
-                        webhook.send(embed=embed)
-            except:
-                pass
-
-            announcementTemp.append(announcementLink)
-
-        announcementLog = announcementTemp
-        time.sleep(20)
-        print('bot working')
-    except:
-        pass
+    msg_log = msg_temp
+    time.sleep(10)
+    print('bot working')
