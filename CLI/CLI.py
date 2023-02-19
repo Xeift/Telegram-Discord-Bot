@@ -16,7 +16,6 @@ _embedHyperlinkSetting = int(input('title hyperlink off/on, enter 1 or 2: '))
 # _embedColor = int(('0xe8006f'), 16)
 # _embedHyperlinkSetting = 2
 
-msg_log = []
 print('setup complete!')
 
 
