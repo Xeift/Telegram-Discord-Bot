@@ -55,11 +55,12 @@ Click `Copy Webhook URL` and paste the URL on notepad, Google Docs or any text e
 
 ![image](https://user-images.githubusercontent.com/80938768/196020693-faa13f8c-7c24-46dc-936f-e0dadb8b046a.png)
 
-#### *TG Channel Slug*
+#### *TG Channel Link*
 
 Click the title of the announcement channel, copy the link `https://t.me/?????`.
 
-![image](https://user-images.githubusercontent.com/80938768/196020250-03ab9c6c-38b8-420c-98ff-7f34fd58cd58.png)
+![image](https://user-images.githubusercontent.com/80938768/221586315-c9d93d38-fd34-4aa9-a649-928cd028153f.png)
+
 
 #### *Embed Color*
 
