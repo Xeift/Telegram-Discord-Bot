@@ -38,7 +38,7 @@ Whether you choose GUI or CLI, we need to obtain below data first:
 |                 | example |
 |-----------------|---------|
 | DC Webhook URL  | https://discord.com/api/webhooks/953518959309783100/nv0byOn-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
-| TG Channel Slug | ~~https://t.me/~~ binance_cn |
+| TG Channel Link | https://t.me/binance_cn |
 | Embed Color     | 0xe8006f |
 
 #### *DC Webhook URL*
@@ -57,7 +57,7 @@ Click `Copy Webhook URL` and paste the URL on notepad, Google Docs or any text e
 
 #### *TG Channel Slug*
 
-Click the title of the announcement channel, copy the slug after `https://t.me/`.
+Click the title of the announcement channel, copy the link `https://t.me/?????`.
 
 ![image](https://user-images.githubusercontent.com/80938768/196020250-03ab9c6c-38b8-420c-98ff-7f34fd58cd58.png)
 
