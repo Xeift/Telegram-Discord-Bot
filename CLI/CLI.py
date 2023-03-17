@@ -1,7 +1,7 @@
-import requests
-from bs4 import BeautifulSoup
 import re
 import time
+import requests
+from bs4 import BeautifulSoup
 from discord import SyncWebhook, Embed
 
 class CustomError(Exception):
