@@ -30,7 +30,7 @@ print('setup complete!')
 '''                                  F U N C T I O N S                                    '''
 def scrapeTelegramMessageBox():
     tg_html = requests.get(f'https://t.me/s/{TG_ANNOUNCEMENT_CHANNEL}') # telegram public channel preview page
-    tg_soup = BeautifulSoup(tg_html.text, 'html.parser')# bs4
+    tg_soup = BeautifulSoup(tg_html.text, 'html.parser') # bs4
     tg_box = tg_soup.find_all('div',{'class': 'tgme_widget_message_wrap js-widget_message_wrap'}) # get each message
     return tg_box
 
