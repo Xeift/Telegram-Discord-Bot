@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from discord import SyncWebhook, Embed
 
+
 class CustomError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -23,6 +24,15 @@ else: EMBED_COLOR = int(EMBED_COLOR, 16)
 EMBED_HYPERLINK_SETTING = int(input('title hyperlink off/on, enter 1 or 2: '))
 if EMBED_HYPERLINK_SETTING != 1 and EMBED_HYPERLINK_SETTING != 2: raise CustomError('A valid title hyperlink setting should be 1 or 2.')
 
+KEYWORD_FILTER_OPTION = str(input("only forward message contains / not cointains certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
+KEYWORD_FILTER_BANK = []
+if KEYWORD_FILTER_OPTION == '':
+    pass
+elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
+    raise CustomError('You should input 1 or 2 or leave it blank')
+else:
+    KEYWORD_FILTER_BANK = str(input('enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
+
 
 print('setup complete!')
 
@@ -32,6 +42,7 @@ def scrapeTelegramMessageBox():
     tg_html = requests.get(f'https://t.me/s/{TG_ANNOUNCEMENT_CHANNEL}') # telegram public channel preview page
     tg_soup = BeautifulSoup(tg_html.text, 'html.parser') # bs4
     tg_box = tg_soup.find_all('div',{'class': 'tgme_widget_message_wrap js-widget_message_wrap'}) # get each message
+    
     return tg_box
 
 
@@ -66,8 +77,25 @@ def getImage(tg_box):
     return msg_image
 
 
+def keywordFilter(msg_text):
+    if KEYWORD_FILTER_OPTION == '1':# only forward message contains certain keyword
+        for KEYWORD in KEYWORD_FILTER_BANK:
+            if KEYWORD in msg_text:
+                return True
+    if KEYWORD_FILTER_OPTION == '2': # only forward message not contains certain keyword
+        contain_keyword = False
+        for KEYWORD in KEYWORD_FILTER_BANK:
+            if KEYWORD in msg_text:
+                contain_keyword = True
+        if contain_keyword == False:
+            return True
+        
+    return False
+    
+
 def sendMessage(msg_link, msg_text, msg_image):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
+    if keywordFilter(msg_text) == False: return
 
     if msg_text != None and msg_image != None:
         if EMBED_HYPERLINK_SETTING == 1:
