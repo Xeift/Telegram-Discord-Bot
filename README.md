@@ -96,3 +96,5 @@ Code by Xeift#1230
 
 Kizmeow icon illustrate by [Kiyue](https://instagram.com/sweetdays_gun_gun?igshid=YmMyMTA2M2Y=)
 ![image](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
+
+It's recommand to use CLI since I have no time to update GUI, functions of GUI are not up to date. 😶
