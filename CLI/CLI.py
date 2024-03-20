@@ -42,7 +42,6 @@ def scrapeTelegramMessageBox():
     tg_html = requests.get(f'https://t.me/s/{TG_ANNOUNCEMENT_CHANNEL}') # telegram public channel preview page
     tg_soup = BeautifulSoup(tg_html.text, 'html.parser') # bs4
     tg_box = tg_soup.find_all('div',{'class': 'tgme_widget_message_wrap js-widget_message_wrap'}) # get each message
-    
     return tg_box
 
 
@@ -95,7 +94,7 @@ def keywordFilter(msg_text):
 
 def sendMessage(msg_link, msg_text, msg_image):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
-    if keywordFilter(msg_text) == False: return
+    if keywordFilter(msg_text) == True: return
 
     if msg_text != None and msg_image != None:
         if EMBED_HYPERLINK_SETTING == 1:
