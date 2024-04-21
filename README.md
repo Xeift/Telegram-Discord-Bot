@@ -94,7 +94,7 @@ TTK theme I use for GUI: [Azure theme for ttk](https://github.com/rdbende/Azure-
 
 A nice tool I use for convert .py to .exe : [Auto PY to EXE](https://github.com/brentvollebregt/auto-py-to-exe)
 
-Code by Xeift#1230
+Code by @xeft. If you have any question, feel free to DM me on Discord or open an issue.
 
 Kizmeow icon illustrate by [Kiyue](https://instagram.com/sweetdays_gun_gun?igshid=YmMyMTA2M2Y=)
 ![image](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
