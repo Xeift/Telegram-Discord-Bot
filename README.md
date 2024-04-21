@@ -15,7 +15,7 @@ What's the difference between Kizmeow and other existing bots?
 |Forward message from private Telegram channel                      |   ❌   |     ✔     |
 |Forward message from private/public Telegram group                 |   ❌   |     ✔❌  |
 |GUI and CLI supported                                              |   ✔    |    ✔❌   |
-|Discord embed supported                                            |   ✔    |    ❌    |
+|Discord embed supported                                            |   ✔    |    ✔❌   |
 
 
 Usage
