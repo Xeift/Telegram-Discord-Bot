@@ -1,5 +1,6 @@
 import re
 import time
+import datetime
 import requests
 from bs4 import BeautifulSoup
 from discord import SyncWebhook, Embed
@@ -33,8 +34,19 @@ elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
 else:
     KEYWORD_FILTER_BANK = str(input('enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
 
+CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
-print('setup complete!')
+SCRIPT_START_TIME = datetime.datetime.now()
+
+print('----------------------------------------------------------------')
+print('Setup Complete! Your Config:')
+print(f'WEBHOOK_URL👉 {WEBHOOK_URL}')
+print(f'TG_ANNOUNCEMENT_CHANNEL👉 {TG_ANNOUNCEMENT_CHANNEL}')
+print(f'EMBED_COLOR👉 {EMBED_COLOR}')
+print(f'EMBED_HYPERLINK_SETTING👉 {EMBED_HYPERLINK_SETTING}')
+print(f'KEYWORD_FILTER_OPTION👉 {KEYWORD_FILTER_OPTION}')
+print(f'CHECK_MESSAGE_EVERY_N_SEC👉 {CHECK_MESSAGE_EVERY_N_SEC}')
+print('----------------------------------------------------------------')
 
 
 '''                                  F U N C T I O N S                                    '''
@@ -53,21 +65,29 @@ def getLink(tg_box):
 
 def getText(tg_box):
     msg_text = tg_box.find_all('div',{'class': 'tgme_widget_message_text js-message_text'}) # get each text
+    converted_text = ''
     if msg_text == []:
-        msg_text = None
+        converted_text = None
     else:
-        msg_text = re.sub( # deal with linebreak
-            '<br/>',
-            '\n',
-            str(msg_text[0])
-        )
-        msg_text = BeautifulSoup(msg_text, 'html.parser').get_text()
+        msg_text = msg_text[0] 
+        for child in msg_text.children:
+            if child.name is None: # plain text
+                converted_text += child
+
+            elif child.name == 'a': # hyperlink
+                if child.text == child['href']: # normal link
+                    converted_text += child['href']
+                else: # markdown link on Telegram
+                    converted_text += f"[{child.text}]({child['href']})"
+
+            elif child.name == 'br': # line break
+                converted_text += '\n'
     
-    return msg_text
+    return converted_text
 
 
 def getImage(tg_box):
-    msg_image = tg_box.find('a',{'class': 'tgme_widget_message_photo_wrap'},href=True)# get each img
+    msg_image = tg_box.find('a',{'class': 'tgme_widget_message_photo_wrap'},href=True) # get each img
     if msg_image != None:
         startIndex = msg_image['style'].find("background-image:url(\'") + 22 # parse image url
         endIndex = msg_image['style'].find(".jpg')") + 4
@@ -77,7 +97,7 @@ def getImage(tg_box):
 
 
 def keywordFilter(msg_text):
-    if KEYWORD_FILTER_OPTION == '1':# only forward message contains certain keyword
+    if KEYWORD_FILTER_OPTION == '1': # only forward message contains certain keyword
         for KEYWORD in KEYWORD_FILTER_BANK:
             if KEYWORD in msg_text:
                 return True
@@ -120,8 +140,11 @@ def sendMessage(msg_link, msg_text, msg_image):
         return
 
     if msg_log != []:
-        print(f'send {msg_link}')
+        print('----------------------------------------------------------------')
+        print(f'New message found!\nLink: {msg_link}\nForward message to Discord')
         webhook.send(embed=embed)
+        print('----------------------------------------------------------------')
+
 '''                                  F U N C T I O N S                                    '''
 
 
@@ -142,8 +165,11 @@ while 1:
             msg_temp.append(msg_link)
 
         msg_log = msg_temp
-        print('bot working')
-        time.sleep(20)
+        
+        current_time = datetime.datetime.now()
+        time_passed = current_time - SCRIPT_START_TIME
+        print(f'bot working. time passed: {time_passed}')
     except Exception as e:
         print(f'[   E R R O R   ]\n{e}\nScript ignored the error and keep running.')
-        time.sleep(20)
+    
+    time.sleep(CHECK_MESSAGE_EVERY_N_SEC)
