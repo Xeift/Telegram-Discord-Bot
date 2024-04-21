@@ -101,8 +101,6 @@ def getText(tg_box):
             elif child.name == 'br': # tg linebreak -> dc linebreak
                 converted_text += '\n'
             
-            print(f'c {converted_text}\n')
-    
     return converted_text
 
 
