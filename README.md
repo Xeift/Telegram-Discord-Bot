@@ -8,12 +8,14 @@ What's the difference between Kizmeow and other existing bots?
 
 |                                                                   | Kizmeow | Other Bots |
 |-------------------------------------------------------------------|:-------:|:----------:|
-|Not required to add Discord Bot to your server                     |   ✔    |     ❌     |
-|Not required to add Telegram Bot to your server                    |   ✔    |     ❌     |
+|Not required to add Discord Bot to your Discord server             |   ✔    |     ❌     |
+|Not required to add Telegram Bot to your Telegram group            |   ✔    |     ❌     |
 |Discord webhook not required                                       |   ❌   |    ✔❌    |
-|Forward message from public Telegram channel which you don't own it|   ✔    |     ❌     |
+|Forward message from public Telegram channel which you don't own it|   ✔    |     ❌    |
 |Forward message from private Telegram channel                      |   ❌   |     ✔     |
-|GUI and CLI supported                                              |   ✔    |    ✔❌    |
+|Forward message from private/public Telegram group                 |   ❌   |     ✔❌  |
+|GUI and CLI supported                                              |   ✔    |    ✔❌   |
+|Discord embed supported                                            |   ✔    |    ❌    |
 
 
 Usage
