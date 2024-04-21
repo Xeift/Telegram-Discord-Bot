@@ -10,29 +10,29 @@ class CustomError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-WEBHOOK_URL = str(input('enter webhook url: '))
+WEBHOOK_URL = str(input('Enter Discord webhook url: '))
 if 'https://discord.com/api/webhooks/' not in WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
 if len(WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
 
-TG_ANNOUNCEMENT_CHANNEL = str(input('enter announcement channel link: '))
+TG_ANNOUNCEMENT_CHANNEL = str(input('Enter Telegram public announcement channel link: '))
 if 'https://t.me/' not in TG_ANNOUNCEMENT_CHANNEL: raise CustomError('A valid channel link should contain "https://t.me/".')
 else: TG_ANNOUNCEMENT_CHANNEL = TG_ANNOUNCEMENT_CHANNEL[13:]
 
-EMBED_COLOR = input('enter embed color (hex): ')
+EMBED_COLOR = input('Enter embed color (hex): ')
 if '0x' not in EMBED_COLOR: raise CustomError('A valid embed color should contain "0x".') 
 else: EMBED_COLOR = int(EMBED_COLOR, 16)
 
-EMBED_HYPERLINK_SETTING = int(input('title hyperlink off/on, enter 1 or 2: '))
+EMBED_HYPERLINK_SETTING = int(input('Title hyperlink off/on, enter 1 or 2: '))
 if EMBED_HYPERLINK_SETTING != 1 and EMBED_HYPERLINK_SETTING != 2: raise CustomError('A valid title hyperlink setting should be 1 or 2.')
 
-KEYWORD_FILTER_OPTION = str(input("only forward message contains / not cointains certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
+KEYWORD_FILTER_OPTION = str(input("Only forward message contains / not cointains certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
 KEYWORD_FILTER_BANK = []
 if KEYWORD_FILTER_OPTION == '':
     pass
 elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
     raise CustomError('You should input 1 or 2 or leave it blank')
 else:
-    KEYWORD_FILTER_BANK = str(input('enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
+    KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
 
 CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
@@ -69,19 +69,39 @@ def getText(tg_box):
     if msg_text == []:
         converted_text = None
     else:
-        msg_text = msg_text[0] 
+        msg_text = msg_text[0]
         for child in msg_text.children:
-            if child.name is None: # plain text
+            if child.name is None: # plain text -> without change
                 converted_text += child
 
-            elif child.name == 'a': # hyperlink
-                if child.text == child['href']: # normal link
+            elif child.name == 'a':
+                if child.text == child['href']: # normal link -> without change
                     converted_text += child['href']
-                else: # markdown link on Telegram
+                else: # tg markdown link -> dc markdown link
                     converted_text += f"[{child.text}]({child['href']})"
 
-            elif child.name == 'br': # line break
+            elif child.name == 'code':
+                converted_text += f"`{child.text}`" # tg markdown monotext -> dc markdown codeblock
+
+            elif child.name == 'b':
+                converted_text += f"**{child.text}**" # tg markdown bold -> dc markdown bold
+
+            elif child.name == 'tg-spoiler':
+                converted_text += f"||{child.text}||" # tg markdown unseen -> dc markdown spoiler
+
+            elif child.name == 'i':
+                converted_text += f"*{child.text}*" # tg markdown italic -> dc markdown italic
+
+            elif child.name == 'u':
+                converted_text += f"__{child.text}__" # tg markdown underline -> dc markdown underline
+                
+            elif child.name == 's':
+                converted_text += f"~~{child.text}~~" # tg markdown strikethrough -> dc markdown strikethrough
+
+            elif child.name == 'br': # tg linebreak -> dc linebreak
                 converted_text += '\n'
+            
+            print(f'c {converted_text}\n')
     
     return converted_text
 
