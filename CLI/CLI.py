@@ -36,6 +36,8 @@ else:
 
 CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
+CONTENT_TEXT = str(input('Add content text above the embed (leave blank if you don\'t want to add additional text): '))
+
 SCRIPT_START_TIME = datetime.datetime.now()
 
 print('----------------------------------------------------------------')
@@ -46,6 +48,7 @@ print(f'EMBED_COLOR👉 {EMBED_COLOR}')
 print(f'EMBED_HYPERLINK_SETTING👉 {EMBED_HYPERLINK_SETTING}')
 print(f'KEYWORD_FILTER_OPTION👉 {KEYWORD_FILTER_OPTION}')
 print(f'CHECK_MESSAGE_EVERY_N_SEC👉 {CHECK_MESSAGE_EVERY_N_SEC}')
+print(f'CONTENT_TEXT👉 {CONTENT_TEXT}')
 print('----------------------------------------------------------------')
 
 
@@ -160,7 +163,8 @@ def sendMessage(msg_link, msg_text, msg_image):
     if msg_log != []:
         print('----------------------------------------------------------------')
         print(f'New message found!\nLink: {msg_link}\nForward message to Discord')
-        webhook.send(embed=embed)
+        if (CONTENT_TEXT == False): webhook.send(embed=embed)
+        else: webhook.send(content=CONTENT_TEXT, embed=embed)
         print('----------------------------------------------------------------')
 
 '''                                  F U N C T I O N S                                    '''
