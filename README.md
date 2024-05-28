@@ -37,11 +37,16 @@ The window on the left side is CLI, the right one is GUI.
 
 Whether you choose GUI or CLI, we need to obtain below data first:
 
-|                 | example |
-|-----------------|---------|
-| DC Webhook URL  | https://discord.com/api/webhooks/953518959309783100/nv0byOn-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
-| TG Channel Link | https://t.me/binance_cn |
-| Embed Color     | 0xe8006f |
+|       Name                           | Description | Required | Example |
+|--------------------------------------|---------|---------|----------|
+| Discord webhook URL                  |The Discord webhook you got in Discord channel|    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
+| Telegram public announcement channel |The link of the public Telegram announcement channel. Public group, private group, private channel will not work|    ✔    | https://t.me/binance_cn |
+| Embed color                          |        |    ✔    | 0xe8006f |
+| Embed hyperlink setting              |        |    ❌    | 1 |
+| Keyword filter option                |        |    ❌    | 1 |
+| KEeyword filter bank                 |        |    ❌    | hello |
+| Check message every n sec            |        |    ✔    | 20 |
+| Content text                         |        |    ❌    | This message is forward from Telegram |
 
 #### *DC Webhook URL*
 
