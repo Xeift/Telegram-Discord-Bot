@@ -1,14 +1,17 @@
+import datetime
 import re
 import time
-import datetime
+
 import requests
 from bs4 import BeautifulSoup
-from discord import SyncWebhook, Embed
+from discord import Embed, SyncWebhook
 
 
 class CustomError(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+
 
 WEBHOOK_URL = str(input('Enter Discord webhook url: '))
 if 'https://discord.com/api/webhooks/' not in WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
@@ -22,8 +25,8 @@ EMBED_COLOR = input('Enter embed color (hex): ')
 if '0x' not in EMBED_COLOR: raise CustomError('A valid embed color should contain "0x".') 
 else: EMBED_COLOR = int(EMBED_COLOR, 16)
 
-EMBED_HYPERLINK_SETTING = int(input('Title hyperlink off/on, enter 1 or 2: '))
-if EMBED_HYPERLINK_SETTING != 1 and EMBED_HYPERLINK_SETTING != 2: raise CustomError('A valid title hyperlink setting should be 1 or 2.')
+EMBED_HYPERLINK_SETTING = str(input('Title hyperlink off/on, enter 1 or 2: '))
+if EMBED_HYPERLINK_SETTING != '1' and EMBED_HYPERLINK_SETTING != '2': raise CustomError('A valid title hyperlink setting should be 1 or 2.')
 
 KEYWORD_FILTER_OPTION = str(input("Only forward message contains / not cointains certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
 KEYWORD_FILTER_BANK = []
@@ -47,6 +50,7 @@ print(f'TG_ANNOUNCEMENT_CHANNEL👉 {TG_ANNOUNCEMENT_CHANNEL}')
 print(f'EMBED_COLOR👉 {EMBED_COLOR}')
 print(f'EMBED_HYPERLINK_SETTING👉 {EMBED_HYPERLINK_SETTING}')
 print(f'KEYWORD_FILTER_OPTION👉 {KEYWORD_FILTER_OPTION}')
+print(f'KEYWORD_FILTER_BANK {KEYWORD_FILTER_BANK}')
 print(f'CHECK_MESSAGE_EVERY_N_SEC👉 {CHECK_MESSAGE_EVERY_N_SEC}')
 print(f'CONTENT_TEXT👉 {CONTENT_TEXT}')
 print('----------------------------------------------------------------')
@@ -121,21 +125,22 @@ def keywordFilter(msg_text):
     if KEYWORD_FILTER_OPTION == '1': # only forward message contains certain keyword
         for KEYWORD in KEYWORD_FILTER_BANK:
             if KEYWORD in msg_text:
-                return True
+                return False
+        return True
     if KEYWORD_FILTER_OPTION == '2': # only forward message not contains certain keyword
         contain_keyword = False
         for KEYWORD in KEYWORD_FILTER_BANK:
             if KEYWORD in msg_text:
                 contain_keyword = True
-        if contain_keyword == False:
-            return True
-        
-    return False
+        return contain_keyword
+    
+    return True
     
 
 def sendMessage(msg_link, msg_text, msg_image):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
-    if keywordFilter(msg_text) == True: return
+    skip_this_msg = keywordFilter(msg_text)
+    if skip_this_msg == True: return
 
     if msg_text != None and msg_image != None:
         if EMBED_HYPERLINK_SETTING == 1:
