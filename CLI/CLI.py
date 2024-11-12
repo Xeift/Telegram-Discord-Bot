@@ -1,5 +1,4 @@
 import datetime
-import re
 import time
 
 import requests
@@ -12,36 +11,45 @@ class CustomError(Exception):
         super().__init__(message)
 
 
+try:
+    WEBHOOK_URL = str(input('Enter Discord webhook url: '))
+    if 'https://discord.com/api/webhooks/' not in WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
+    if len(WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
 
-WEBHOOK_URL = str(input('Enter Discord webhook url: '))
-if 'https://discord.com/api/webhooks/' not in WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
-if len(WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
+    TG_ANNOUNCEMENT_CHANNEL = str(input('Enter Telegram public announcement channel link: '))
+    if 'https://t.me/' not in TG_ANNOUNCEMENT_CHANNEL: raise CustomError('A valid channel link should contain "https://t.me/".')
+    else: TG_ANNOUNCEMENT_CHANNEL = TG_ANNOUNCEMENT_CHANNEL[13:]
 
-TG_ANNOUNCEMENT_CHANNEL = str(input('Enter Telegram public announcement channel link: '))
-if 'https://t.me/' not in TG_ANNOUNCEMENT_CHANNEL: raise CustomError('A valid channel link should contain "https://t.me/".')
-else: TG_ANNOUNCEMENT_CHANNEL = TG_ANNOUNCEMENT_CHANNEL[13:]
+    EMBED_COLOR = input('Enter embed color (hex): ')
+    if '0x' not in EMBED_COLOR: raise CustomError('A valid embed color should contain "0x".') 
+    else: EMBED_COLOR = int(EMBED_COLOR, 16)
 
-EMBED_COLOR = input('Enter embed color (hex): ')
-if '0x' not in EMBED_COLOR: raise CustomError('A valid embed color should contain "0x".') 
-else: EMBED_COLOR = int(EMBED_COLOR, 16)
+    EMBED_HYPERLINK_SETTING = str(input('Embed title setting. No title(1), title hyperlink off(2), title hyperlink on(3), enter 1, 2 or 3: '))
+    if EMBED_HYPERLINK_SETTING != '1' and EMBED_HYPERLINK_SETTING != '2' and EMBED_HYPERLINK_SETTING != '3': raise CustomError('A valid title hyperlink setting should be 1, 2 or 3.')
 
-EMBED_HYPERLINK_SETTING = str(input('Title hyperlink off/on, enter 1 or 2: '))
-if EMBED_HYPERLINK_SETTING != '1' and EMBED_HYPERLINK_SETTING != '2': raise CustomError('A valid title hyperlink setting should be 1 or 2.')
+    KEYWORD_FILTER_OPTION = str(input("Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
+    KEYWORD_FILTER_BANK = []
+    if KEYWORD_FILTER_OPTION == '':
+        pass
+    elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
+        raise CustomError('You should input 1 or 2 or leave it blank')
+    else:
+        KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
 
-KEYWORD_FILTER_OPTION = str(input("Only forward message contains / not cointains certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
-KEYWORD_FILTER_BANK = []
-if KEYWORD_FILTER_OPTION == '':
-    pass
-elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
-    raise CustomError('You should input 1 or 2 or leave it blank')
-else:
-    KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
+    CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
-CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
+    CONTENT_TEXT = str(input('Add content text above the embed (leave blank if you don\'t want to add additional text): '))
 
-CONTENT_TEXT = str(input('Add content text above the embed (leave blank if you don\'t want to add additional text): '))
+    SCRIPT_START_TIME = datetime.datetime.now()
 
-SCRIPT_START_TIME = datetime.datetime.now()
+except CustomError as e:
+    print('----------------------------------------------------------------')
+    print(f'[   E R R O R   ]\n{e}')
+    print('Press Enter key to exit. Consider restart CLI.exe')
+    print('If you need any help, feel free to send a DM to:\nDiscord @xeift\nTelegram @Xeift')
+    print('----------------------------------------------------------------')
+    input()
+
 
 print('----------------------------------------------------------------')
 print('Setup Complete! Your Config:')
@@ -122,6 +130,9 @@ def getImage(tg_box):
 
 
 def keywordFilter(msg_text):
+    if KEYWORD_FILTER_OPTION == '': # no filter, forward all message
+        return False
+    
     if KEYWORD_FILTER_OPTION == '1': # only forward message contains certain keyword
         for KEYWORD in KEYWORD_FILTER_BANK:
             if KEYWORD in msg_text:
@@ -142,28 +153,12 @@ def sendMessage(msg_link, msg_text, msg_image):
     skip_this_msg = keywordFilter(msg_text)
     if skip_this_msg == True: return
 
-    if msg_text != None and msg_image != None:
-        if EMBED_HYPERLINK_SETTING == 1:
-            embed = Embed(title='Forward From Telegram', description=msg_text, color=EMBED_COLOR)
-        elif EMBED_HYPERLINK_SETTING == 2:
-            embed = Embed(title='Original Telegram Link', description=msg_text, url=msg_link, color=EMBED_COLOR)
-        embed.set_image(url=msg_image)
+    embed = Embed(title='', color=EMBED_COLOR)
 
-    elif msg_text == None and msg_image != None:
-        if EMBED_HYPERLINK_SETTING == 1:
-            embed = Embed(title='Forward From Telegram', color=EMBED_COLOR)
-        elif EMBED_HYPERLINK_SETTING == 2:
-            embed = Embed(title='Original Telegram Link', url=msg_link, color=EMBED_COLOR)
-        embed.set_image(url=msg_image)
-
-    elif msg_text != None and msg_image == None:
-        if EMBED_HYPERLINK_SETTING == 1:
-            embed = Embed(title='Forward From Telegram', description=msg_text, color=EMBED_COLOR)
-        elif EMBED_HYPERLINK_SETTING == 2:
-            embed = Embed(title='Original Telegram Link', description=msg_text, url=msg_link, color=EMBED_COLOR)
-
-    else:
-        return
+    if msg_text != None: embed.description = msg_text
+    if msg_image != None: embed.set_image(url=msg_image)
+    if EMBED_HYPERLINK_SETTING == '2': embed.title = 'Forward From Telegram'
+    if EMBED_HYPERLINK_SETTING == '3': embed.title = 'Original Telegram Link'; embed.url = msg_link
 
     if msg_log != []:
         print('----------------------------------------------------------------')
