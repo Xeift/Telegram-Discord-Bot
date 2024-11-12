@@ -29,7 +29,6 @@ try:
 
     KEYWORD_FILTER_OPTION = str(input("Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
     KEYWORD_FILTER_BANK = []
-    FORWARD_IMAGE = ''
     if KEYWORD_FILTER_OPTION == '':
         pass
     elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
@@ -37,8 +36,12 @@ try:
     else:
         KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
         KEYWORD_FILTER_BANK = [s.strip() for s in KEYWORD_FILTER_BANK]
-        FORWARD_IMAGE = str(input("Forward image(1), don't forward image(2), enter 1 or 2: "))
-        if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('You should input 1 or 2.')
+
+    FORWARD_IMAGE = str(input("Forward message with image(1), don't forward message image(2), enter 1 or 2: "))
+    if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('You should input 1 or 2.')
+
+    ONLY_PLAINTEXT = str(input("Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
+    if ONLY_PLAINTEXT != '1' and ONLY_PLAINTEXT != '': raise CustomError('You should input 1 or leave it blank.')
 
     CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
@@ -163,7 +166,7 @@ def sendMessage(msg_link, msg_text, msg_image):
     embed = Embed(title='', color=EMBED_COLOR)
 
     if msg_text != None: embed.description = msg_text
-    if msg_image != None: embed.set_image(url=msg_image)
+    if msg_image != None and ONLY_PLAINTEXT != '1': embed.set_image(url=msg_image)
     if EMBED_HYPERLINK_SETTING == '2': embed.title = 'Forward From Telegram'
     if EMBED_HYPERLINK_SETTING == '3': embed.title = 'Original Telegram Link'; embed.url = msg_link
 
