@@ -29,12 +29,15 @@ try:
 
     KEYWORD_FILTER_OPTION = str(input("Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
     KEYWORD_FILTER_BANK = []
+    FORWARD_IMAGE = ''
     if KEYWORD_FILTER_OPTION == '':
         pass
     elif KEYWORD_FILTER_OPTION != '1' and KEYWORD_FILTER_OPTION != '2':
         raise CustomError('You should input 1 or 2 or leave it blank')
     else:
         KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
+        FORWARD_IMAGE = str(input("Forward image(1), don't forward image(2), enter 1 or 2: "))
+        if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('You should input 1 or 2.')
 
     CHECK_MESSAGE_EVERY_N_SEC = int(input('How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
@@ -130,6 +133,8 @@ def getImage(tg_box):
 
 
 def keywordFilter(msg_text):
+    if msg_text == None or msg_text == '': return False
+
     if KEYWORD_FILTER_OPTION == '': # no filter, forward all message
         return False
     
@@ -144,7 +149,7 @@ def keywordFilter(msg_text):
             if KEYWORD in msg_text:
                 contain_keyword = True
         return contain_keyword
-    
+
     return True
     
 
@@ -152,6 +157,7 @@ def sendMessage(msg_link, msg_text, msg_image):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
     skip_this_msg = keywordFilter(msg_text)
     if skip_this_msg == True: return
+    if msg_image != None and FORWARD_IMAGE == '2': return
 
     embed = Embed(title='', color=EMBED_COLOR)
 
