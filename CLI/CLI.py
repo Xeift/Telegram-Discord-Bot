@@ -36,6 +36,7 @@ try:
         raise CustomError('You should input 1 or 2 or leave it blank')
     else:
         KEYWORD_FILTER_BANK = str(input('Enter your keyword, separate by comma if you have multiple keyword (e.g. ant, bear, cat): ')).split(',')
+        KEYWORD_FILTER_BANK = [s.strip() for s in KEYWORD_FILTER_BANK]
         FORWARD_IMAGE = str(input("Forward image(1), don't forward image(2), enter 1 or 2: "))
         if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('You should input 1 or 2.')
 
