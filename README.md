@@ -21,11 +21,13 @@ What's the difference between Kizmeow and other existing bots?
 Usage
 -----------------
 
-Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
+1. Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
 
 If you don't want to download any file on your precious computer, you can run CLI on cloud first.
 
 [Click me](https://replit.com/@xeiftc/Kizmeow-Telegram-Discord-Bot#main.py) to run CLI on Replit.
+
+2. Run CLI,
 
 There are two interface, GUI and CLI.
 
