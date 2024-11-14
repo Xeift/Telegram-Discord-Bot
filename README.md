@@ -50,7 +50,12 @@ Whether you choose GUI or CLI, we need to obtain below data first:
 | Check message every n sec            |        |    ✔    | 20 |
 | Content text                         |        |    ❌    | This message is forward from Telegram |
 
-#### *DC Webhook URL*
+The gif table below shows the steps to get these parameters.
+
+|       Parameter Name       |                                 How to get the parameter?                                 |
+|----------------------------|-------------------------------------------------------------------------------------------|
+|     Discord webhook URL    | ![image](https://github.com/user-attachments/assets/9798b6ea-9be7-40b5-8169-87e3445d1c8d) |
+
 
 Right click on the Discord server you want to forward message to.
 
