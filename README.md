@@ -11,38 +11,24 @@ What's the difference between Kizmeow and other existing bots?
 |Not required to add Discord Bot to your Discord server             |   ✔    |     ❌     |
 |Not required to add Telegram Bot to your Telegram group            |   ✔    |     ❌     |
 |Discord webhook not required                                       |   ❌   |    ✔❌    |
-|Forward message from public Telegram channel which you don't own it|   ✔    |     ❌    |
-|Forward message from private Telegram channel                      |   ❌   |     ✔     |
-|Forward message from private/public Telegram group                 |   ❌   |     ✔❌  |
-|GUI and CLI supported                                              |   ✔    |    ✔❌   |
-|Discord embed supported                                            |   ✔    |    ✔❌   |
-
+|Forward message from public Telegram channel which you don't own it|   ✔    |     ❌     |
+|Forward message from private Telegram channel                      |   ❌   |     ✔      |
+|Forward message from private or public Telegram group              |   ❌   |     ✔❌   |
+|Discord embed supported                                            |   ✔    |    ✔❌    |
+|Keyword filter                                                     |   ✔    |    ✔❌    |
 
 Usage
 -----------------
 
 1. Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
 
-If you don't want to download any file on your precious computer, you can run CLI on cloud first.
+2. Unzip the file and run CLI.exe. If you are familiar with python, you can run CLI.py too.
 
-[Click me](https://replit.com/@xeiftc/Kizmeow-Telegram-Discord-Bot#main.py) to run CLI on Replit.
-
-2. Run CLI,
-
-There are two interface, GUI and CLI.
-
-You can choose one you desire. If you're not familiar with Python, I suggest you use GUI.
-
-The window on the left side is CLI, the right one is GUI.
-
-![image](https://user-images.githubusercontent.com/80938768/196021293-f8741207-a46c-4902-b4aa-b3f03fe467e5.png)
-
-Whether you choose GUI or CLI, we need to obtain below data first:
+3. Before we run CLI.py, we need to obtain below data first:
 
 |       Name                           | Description | Required | Example |
 |--------------------------------------|-------------|----------|---------|
-| Discord webhook URL                  |The Discord webhook you got in Discord channel|    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-![image](https://github.com/user-attachments/assets/70694575-c8e8-44c8-a37c-641803b80a49)
-xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C |
+| Discord webhook URL                  |The Discord webhook you got in Discord channel|    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-![image](https://github.com/user-attachments/assets/70694575-c8e8-44c8-a37c-641803b80a49xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C) |
 | Telegram public announcement channel |The link of the public Telegram announcement channel. Public group, private group, private channel will not work|    ✔    | https://t.me/dsafdsfa3243 |
 | Embed color                          |        |    ✔    | 0xe8006f |
 | Embed hyperlink setting              |        |    ❌    | 1 |
