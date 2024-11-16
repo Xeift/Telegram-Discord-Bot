@@ -45,47 +45,6 @@ The gif table below shows the steps to get these parameters.
 |    Telegram public announcement channel    | ![image](https://github.com/user-attachments/assets/98f40aad-471c-42bf-b2c6-038fcc639e77) |
 |                Embed color                 | ![image](https://github.com/user-attachments/assets/d072d6d9-22e1-412d-8278-7a6676e7feb0) |
 
-Right click on the Discord server you want to forward message to.
-
-Select `Server Settings` → `Intergrations`
-
-![image](https://user-images.githubusercontent.com/80938768/196020310-9080efb6-cf40-4480-9286-9423b8d02482.png)
-
-Click `New Webhhok` to create a new webhook.
-
-Click `Copy Webhook URL` and paste the URL on notepad, Google Docs or any text editor, we will need it later.
-
-![image](https://user-images.githubusercontent.com/80938768/196020693-faa13f8c-7c24-46dc-936f-e0dadb8b046a.png)
-
-#### *TG Channel Link*
-
-Click the title of the announcement channel, copy the link `https://t.me/?????`.
-
-![image](https://user-images.githubusercontent.com/80938768/221586315-c9d93d38-fd34-4aa9-a649-928cd028153f.png)
-
-
-#### *Embed Color*
-
-Google "color picker" and choose the color you like, copy its HEX value and change "#" to "0x".
-
-![image](https://user-images.githubusercontent.com/80938768/196021711-9626ec37-e4da-4dd9-9485-7d6dfefe2ef9.png)
-
-Finally, we got all data we need.
-
-#### *GUI*
-
-1. Open `GUI` folder
-2. Run GUI.exe
-3. Enter data, click start bot
-
-Video Tutorial: https://www.youtube.com/watch?v=YuWAM28t8nc
-
-#### *CLI*
-
-1. Open `CLI` folder
-2. Install python and packages in requirements.txt
-3. Run CLI
-4. Enter data, it will start automatically
 
 Note
 -----------------
