@@ -36,7 +36,7 @@ Usage
 | Keyword filter bank                  |        |    (✔)  | hello |
 | Check message every n sec            |        |    ✔    | 20 |
 | Content text                         |        |    ❌   | This message is forward from Telegram |
-| Fprward image                        | Forward message with image(1), don't forward message image(2) |    ❌   | 1 |
+| Forward image                        | Forward message with image(1), don't forward message image(2) |    ❌   | 1 |
 
 The gif table below shows the steps to get these parameters.
 
