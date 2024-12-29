@@ -12,9 +12,9 @@ class CustomError(Exception):
 
 
 try:
-    WEBHOOK_URL = str(input('[WEBHOOK_URL] Enter Discord webhook url: '))
-    if 'https://discord.com/api/webhooks/' not in WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
-    if len(WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
+    DC_WEBHOOK_URL = str(input('[DC_WEBHOOK_URL] Enter Discord webhook url: '))
+    if 'https://discord.com/api/webhooks/' not in DC_WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
+    if len(DC_WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
 
     TG_ANNOUNCEMENT_CHANNEL = str(input('[TG_ANNOUNCEMENT_CHANNEL] Enter Telegram public announcement channel link: '))
     if 'https://t.me/' not in TG_ANNOUNCEMENT_CHANNEL: raise CustomError('A valid channel link should contain "https://t.me/".')
@@ -60,7 +60,7 @@ except CustomError as e:
 
 print('----------------------------------------------------------------')
 print('Setup Complete! Your Config:')
-print(f'WEBHOOK_URL👉 {WEBHOOK_URL}')
+print(f'DC_WEBHOOK_URL👉 {DC_WEBHOOK_URL}')
 print(f'TG_ANNOUNCEMENT_CHANNEL👉 {TG_ANNOUNCEMENT_CHANNEL}')
 print(f'EMBED_COLOR👉 {EMBED_COLOR}')
 print(f'EMBED_HYPERLINK_SETTING👉 {EMBED_TITLE_SETTING}')
@@ -158,7 +158,7 @@ def keywordFilter(msg_text):
     
 
 def sendMessage(msg_link, msg_text, msg_image):
-    webhook = SyncWebhook.from_url(WEBHOOK_URL)
+    webhook = SyncWebhook.from_url(DC_WEBHOOK_URL)
     skip_this_msg = keywordFilter(msg_text)
     if skip_this_msg == True: return
     if msg_image != None and FORWARD_IMAGE == '2': return
