@@ -47,19 +47,6 @@ The gif table below shows the steps to get these parameters.
 |                Embed color                 | ![image](https://github.com/user-attachments/assets/d072d6d9-22e1-412d-8278-7a6676e7feb0) |
 
 
-Note
------------------
-
-TTK theme I use for GUI: [Azure theme for ttk](https://github.com/rdbende/Azure-ttk-theme)
-
-A nice tool I use for convert .py to .exe : [Auto PY to EXE](https://github.com/brentvollebregt/auto-py-to-exe)
-
-Code by @xeft. If you have any question, feel free to DM me on Discord or open an issue.
-
-Kizmeow icon illustrate by [Kiyue](https://instagram.com/sweetdays_gun_gun?igshid=YmMyMTA2M2Y=)
-![image](https://user-images.githubusercontent.com/80938768/196019602-f4ac2896-cdaa-4028-acdb-53b8a0a60d43.png)
-
-It's recommand to use CLI since I have no time to update GUI, functions of GUI are not up to date. 😶
 
 FAQ
 -----------------
@@ -68,3 +55,12 @@ FAQ
 <summary>Do I need to keep my computer on if I want to make this script running 7/24?</summary>
 Yes.
 </details>
+
+<details>
+<summary>Does this script only works on public channels?</summary>
+Yes. This script does *not* works in group(private/public), channel(private). The purpose of this script is *forward message in a public Telegram channel which you don't own it to a Discord server which only requires manage webhook permission*. If you are the admin of both Telegram group and Discord channel, you can try [IFTTT](https://ifttt.com/explore), it's much more easier to set up.
+</details>
+
+Note
+-----------------
+Code by @xeft. If you have any question, feel free to DM me on Discord or open an issue.
