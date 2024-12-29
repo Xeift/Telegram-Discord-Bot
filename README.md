@@ -28,12 +28,12 @@ Usage
 
 |       Name                           | Description | Required | Example |
 |--------------------------------------|-------------|----------|---------|
-| Discord webhook URL                  |The Discord webhook you got in Discord channel|    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-![image](https://github.com/user-attachments/assets/70694575-c8e8-44c8-a37c-641803b80a49xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C) |
+| WEBHOOK_URL                          |The Discord webhook you got in Discord channel                                                                  |    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-![image](https://github.com/user-attachments/assets/70694575-c8e8-44c8-a37c-641803b80a49xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C) |
 | Telegram public announcement channel |The link of the public Telegram announcement channel. Public group, private group, private channel will not work|    ✔    | https://t.me/dsafdsfa3243 |
-| Embed color                          |        |    ✔    | 0xe8006f |
-| Embed hyperlink setting              |        |    ❌   | 1 |
-| Keyword filter option                |        |    ✔    | 1 |
-| Keyword filter bank                  |        |    (✔)  | hello |
+| Embed color                          |The color of the forwarded Discord embed message                                                                |    ✔    | 0xe8006f |
+| Embed title setting                  |The title style of the forwarded Discord embed message                                                          |    ❌   | 1 |
+| Keyword filter option                |        |    ✔    | 2 |
+| Keyword filter bank                  |        |    (✔)  | ant,bear,cat |
 | Check message every n sec            |        |    ✔    | 20 |
 | Content text                         |        |    ❌   | This message is forward from Telegram |
 | Forward image                        | Forward message with image(1), don't forward message image(2) |    ❌   | 1 |
