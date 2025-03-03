@@ -1,4 +1,4 @@
-# Kizmeow-Telegram-Discord-Bot
+# Telegram-Discord-Bot
 A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url.
 
 The bot is under development, it only forward text messages and images currently. 
@@ -28,15 +28,16 @@ Usage
 
 |       Name                           | Description | Required | Example |
 |--------------------------------------|-------------|----------|---------|
-| WEBHOOK_URL                          |The Discord webhook you got in Discord channel                                                                  |    ✔    | https://discord.com/api/webhooks/953518959309783100/nv0byOn-![image](https://github.com/user-attachments/assets/70694575-c8e8-44c8-a37c-641803b80a49xwMmRfHV6lasGbkhmNX0DvQyUAMJcoRbZJeHrpIpVKdB9bjJk962BddJRq8C) |
-| Telegram public announcement channel |The link of the public Telegram announcement channel. Public group, private group, private channel will not work|    ✔    | https://t.me/dsafdsfa3243 |
-| Embed color                          |The color of the forwarded Discord embed message                                                                |    ✔    | 0xe8006f |
-| Embed title setting                  |The title style of the forwarded Discord embed message                                                          |    ❌   | 1 |
-| Keyword filter option                |        |    ✔    | 2 |
-| Keyword filter bank                  |        |    (✔)  | ant,bear,cat |
-| Check message every n sec            |        |    ✔    | 20 |
-| Content text                         |        |    ❌   | This message is forward from Telegram |
-| Forward image                        | Forward message with image(1), don't forward message image(2) |    ❌   | 1 |
+| DC_WEBHOOK_URL                       | The Discord webhook you got in Discord channel                                                                   |    ✔    | https://discord.com/api/webhooks/1322806255961509930/Bhz0Q2mv6rz9gXclYAFSl7tvbqdhhbEr3no6WY6o-fWwa6rp5Mg8t_EbtvIjnuR6lb3u |
+| TG_ANNOUNCEMENT_CHANNEL              | The link of the public Telegram announcement channel. Public group, private group, private channel will not work |    ✔    | https://t.me/dsafdsfa3243 |
+| EMBED_COLOR                          | The color of the forwarded Discord embed message                                                                 |    ✔    | 0xe8006f |
+| EMBED_TITLE_SETTING                  | The title style of the forwarded Discord embed message                                                           |    ❌   | 1 |
+| KEYWORD_FILTER_OPTION                | Useful when you want to filter some message with/without specific keywords                                       |    ✔    | 2 |
+| KEYWORD_FILTER_BANK                  | The words you want to filter                                                                                     |    (✔)  | ant,bear,cat |
+| CHECK_MESSAGE_EVERY_N_SEC            | How many seconds you want the script to check new message                                                        |    ✔    | 20 |
+| CONTENT_TEXT                         | Add custom content text above the embed                                                                          |    ❌   | This message is forward from Telegram =w= |
+| FORWARD_IMAGE                        | Forward/don't message with image                                                                                 |    ❌   | 1 |
+| ONLY_PLAINTEXT                       | Remove any other multimedia, only forward plaintext                                                              |    ❌   | 1 |
 
 The gif table below shows the steps to get these parameters.
 
