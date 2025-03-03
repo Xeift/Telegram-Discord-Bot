@@ -1,4 +1,5 @@
 import datetime
+import re
 import time
 
 import requests
@@ -100,7 +101,12 @@ def getText(tg_box):
                 if child.text == child['href']: # normal link -> without change
                     converted_text += child['href']
                 else: # tg markdown link -> dc markdown link
-                    converted_text += f"[{child.text}]({child['href']})"
+                    href = re.sub( # deal with extra 'amp;' in href
+                        'amp;',
+                        '',
+                        child['href']
+                    )
+                    converted_text += f"[{child.text}]({href})"
 
             elif child.name == 'code':
                 converted_text += f"`{child.text}`" # tg markdown monotext -> dc markdown codeblock
