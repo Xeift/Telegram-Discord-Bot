@@ -1,10 +1,14 @@
 import datetime
+import os
 import re
 import time
 
 import requests
 from bs4 import BeautifulSoup
 from discord import Embed, SyncWebhook
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class CustomError(Exception):
@@ -13,22 +17,22 @@ class CustomError(Exception):
 
 
 try:
-    DC_WEBHOOK_URL = str(input('[DC_WEBHOOK_URL] Enter Discord webhook url: '))
+    DC_WEBHOOK_URL = os.getenv('DC_WEBHOOK_URL') or str(input('[DC_WEBHOOK_URL] Enter Discord webhook url: '))
     if 'https://discord.com/api/webhooks/' not in DC_WEBHOOK_URL: raise CustomError('A valid webhook url should contain "https://discord.com/api/webhooks/".')
     if len(DC_WEBHOOK_URL) != 121: raise CustomError('A valid webhook url should be 121 character long.')
 
-    TG_ANNOUNCEMENT_CHANNEL = str(input('[TG_ANNOUNCEMENT_CHANNEL] Enter Telegram public announcement channel link: '))
+    TG_ANNOUNCEMENT_CHANNEL = os.getenv('TG_ANNOUNCEMENT_CHANNEL') or str(input('[TG_ANNOUNCEMENT_CHANNEL] Enter Telegram public announcement channel link: '))
     if 'https://t.me/' not in TG_ANNOUNCEMENT_CHANNEL: raise CustomError('A valid channel link should contain "https://t.me/".')
     else: TG_ANNOUNCEMENT_CHANNEL = TG_ANNOUNCEMENT_CHANNEL[13:]
 
-    EMBED_COLOR = input('[EMBED_COLOR] Enter embed color (hex): ')
+    EMBED_COLOR = os.getenv('EMBED_COLOR') or input('[EMBED_COLOR] Enter embed color (hex): ')
     if '0x' not in EMBED_COLOR: raise CustomError('A valid embed color should contain "0x".') 
     else: EMBED_COLOR = int(EMBED_COLOR, 16)
 
-    EMBED_TITLE_SETTING = str(input('[EMBED_TITLE_SETTING] Embed title setting. No title(1), title hyperlink off(2), title hyperlink on(3), enter 1, 2 or 3: '))
+    EMBED_TITLE_SETTING = os.getenv('EMBED_TITLE_SETTING') or str(input('[EMBED_TITLE_SETTING] Embed title setting. No title(1), title hyperlink off(2), title hyperlink on(3), enter 1, 2 or 3: '))
     if EMBED_TITLE_SETTING != '1' and EMBED_TITLE_SETTING != '2' and EMBED_TITLE_SETTING != '3': raise CustomError('A valid title hyperlink setting should be 1, 2 or 3.')
 
-    KEYWORD_FILTER_OPTION = str(input("[KEYWORD_FILTER_OPTION] Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
+    KEYWORD_FILTER_OPTION = os.getenv('KEYWORD_FILTER_OPTION') if os.getenv('KEYWORD_FILTER_OPTION') is not None else str(input("[KEYWORD_FILTER_OPTION] Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
     KEYWORD_FILTER_BANK = []
     if KEYWORD_FILTER_OPTION == '':
         pass
@@ -38,15 +42,15 @@ try:
         KEYWORD_FILTER_BANK = str(input('[KEYWORD_FILTER_BANK] Enter your keywords, separate by comma if you have multiple keywords (e.g. ant,bear,cat): ')).split(',')
         KEYWORD_FILTER_BANK = [s.strip() for s in KEYWORD_FILTER_BANK]
 
-    FORWARD_IMAGE = str(input("[FORWARD_IMAGE] Forward message with image(1), don't forward message image(2), enter 1 or 2: "))
+    FORWARD_IMAGE = os.getenv('FORWARD_IMAGE') or str(input("[FORWARD_IMAGE] Forward message with image(1), don't forward message image(2), enter 1 or 2: "))
     if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('You should input 1 or 2.')
 
-    ONLY_PLAINTEXT = str(input("[ONLY_PLAINTEXT] Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
+    ONLY_PLAINTEXT = os.getenv('ONLY_PLAINTEXT') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[ONLY_PLAINTEXT] Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
     if ONLY_PLAINTEXT != '1' and ONLY_PLAINTEXT != '': raise CustomError('You should input 1 or leave it blank.')
 
-    CHECK_MESSAGE_EVERY_N_SEC = int(input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
+    CHECK_MESSAGE_EVERY_N_SEC = int(os.getenv('CHECK_MESSAGE_EVERY_N_SEC')) or int(input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
 
-    CONTENT_TEXT = str(input('[CONTENT_TEXT] Add content text above the embed (leave blank if you don\'t want to add additional text): '))
+    CONTENT_TEXT = os.getenv('CONTENT_TEXT') if os.getenv('CONTENT_TEXT') is not None else str(input('[CONTENT_TEXT] Add content text above the embed (leave blank if you don\'t want to add additional text): '))
 
     SCRIPT_START_TIME = datetime.datetime.now()
 
@@ -60,15 +64,16 @@ except CustomError as e:
 
 
 print('----------------------------------------------------------------')
+if os.getenv('DC_WEBHOOK_URL') is not None: print('Use the .env file as primary config source.')
 print('Setup Complete! Your Config:')
-print(f'DC_WEBHOOK_URL👉 {DC_WEBHOOK_URL}')
-print(f'TG_ANNOUNCEMENT_CHANNEL👉 {TG_ANNOUNCEMENT_CHANNEL}')
-print(f'EMBED_COLOR👉 {EMBED_COLOR}')
-print(f'EMBED_HYPERLINK_SETTING👉 {EMBED_TITLE_SETTING}')
-print(f'KEYWORD_FILTER_OPTION👉 {KEYWORD_FILTER_OPTION}')
-print(f'KEYWORD_FILTER_BANK {KEYWORD_FILTER_BANK}')
-print(f'CHECK_MESSAGE_EVERY_N_SEC👉 {CHECK_MESSAGE_EVERY_N_SEC}')
-print(f'CONTENT_TEXT👉 {CONTENT_TEXT}')
+print(f'DC_WEBHOOK_URL: {DC_WEBHOOK_URL}')
+print(f'TG_ANNOUNCEMENT_CHANNEL: {TG_ANNOUNCEMENT_CHANNEL}')
+print(f'EMBED_COLOR: {EMBED_COLOR}')
+print(f'EMBED_HYPERLINK_SETTING: {EMBED_TITLE_SETTING}')
+print(f'KEYWORD_FILTER_OPTION: {KEYWORD_FILTER_OPTION}')
+print(f'KEYWORD_FILTER_BANK: {KEYWORD_FILTER_BANK}')
+print(f'CHECK_MESSAGE_EVERY_N_SEC: {CHECK_MESSAGE_EVERY_N_SEC}')
+print(f'CONTENT_TEXT: {CONTENT_TEXT}')
 print('----------------------------------------------------------------')
 
 
