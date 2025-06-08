@@ -62,6 +62,11 @@ Yes.
 Yes. This script does *not* works in group(private/public), channel(private). The purpose of this script is *forward message in a public Telegram channel which you don't own it to a Discord server which only requires manage webhook permission*. If you are the admin of both Telegram group and Discord channel, you can try [IFTTT](https://ifttt.com/explore), it's much more easier to set up.
 </details>
 
+<details>
+<summary>I don't want to enter the cofig evertime I start the script. Does it support .env?</summary>
+Yes. You can create a .env file and put the cofig in it. See [.env.example](https://github.com/Xeift/Telegram-Discord-Bot/blob/main/.env.example) for actual format and fields. 
+</details>
+
 Note
 -----------------
 Code by @xeft. If you have any question, feel free to DM me on Discord or open an issue.
