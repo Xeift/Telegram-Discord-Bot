@@ -1,21 +1,21 @@
 # Telegram-Discord-Bot
-A bot that forwards Telegram messages to Discord via webhook. Kizmeow does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url.
+A bot that forwards Telegram messages to Discord via webhook. It does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url.
 
 The bot is under development, it only forward text messages and images currently. 
 
 What's the difference between Kizmeow and other existing bots?
 -----------------
 
-|                                                                   | Kizmeow | Other Bots |
-|-------------------------------------------------------------------|:-------:|:----------:|
-|Not required to add Discord Bot to your Discord server             |   ✔    |     ❌     |
-|Not required to add Telegram Bot to your Telegram group            |   ✔    |     ❌     |
-|Discord webhook not required                                       |   ❌   |    ✔❌    |
-|Forward message from public Telegram channel which you don't own it|   ✔    |     ❌     |
-|Forward message from private Telegram channel                      |   ❌   |     ✔      |
-|Forward message from private or public Telegram group              |   ❌   |     ✔❌   |
-|Discord embed supported                                            |   ✔    |    ✔❌    |
-|Keyword filter                                                     |   ✔    |    ✔❌    |
+|                                                                   | This Script | Other Bots |
+|-------------------------------------------------------------------|:-----------:|:----------:|
+|Not required to add Discord Bot to your Discord server             |   ✔        |     ❌     |
+|Not required to add Telegram Bot to your Telegram group            |   ✔        |     ❌     |
+|Discord webhook not required                                       |   ❌       |    ✔❌    |
+|Forward message from public Telegram channel which you don't own it|   ✔        |     ❌     |
+|Forward message from private Telegram channel                      |   ❌       |     ✔      |
+|Forward message from private or public Telegram group              |   ❌       |     ✔❌   |
+|Discord embed supported                                            |   ✔        |    ✔❌    |
+|Keyword filter                                                     |   ✔        |    ✔❌    |
 
 Usage
 -----------------
