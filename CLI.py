@@ -48,8 +48,9 @@ try:
     ONLY_PLAINTEXT = os.getenv('ONLY_PLAINTEXT') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[ONLY_PLAINTEXT] Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
     if ONLY_PLAINTEXT != '1' and ONLY_PLAINTEXT != '': raise CustomError('[ONLY_PLAINTEXT] You should input 1 or leave it blank.')
 
-    CHECK_MESSAGE_EVERY_N_SEC = int(os.getenv('CHECK_MESSAGE_EVERY_N_SEC')) or int(input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): '))
-
+    CHECK_MESSAGE_EVERY_N_SEC = os.getenv('CHECK_MESSAGE_EVERY_N_SEC') or input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): ')
+    CHECK_MESSAGE_EVERY_N_SEC = int(CHECK_MESSAGE_EVERY_N_SEC)
+    
     CONTENT_TEXT = os.getenv('CONTENT_TEXT') if os.getenv('CONTENT_TEXT') is not None else str(input('[CONTENT_TEXT] Add content text above the embed (leave blank if you don\'t want to add additional text): '))
 
     SCRIPT_START_TIME = datetime.datetime.now()
