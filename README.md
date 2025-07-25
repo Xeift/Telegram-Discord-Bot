@@ -19,12 +19,10 @@ What's the difference between Kizmeow and other existing bots?
 
 Usage
 -----------------
+## For Windows User
+1. Go to the [release page](https://github.com/Xeift/Telegram-Discord-Bot/releases) and download CLI.exe.
 
-1. Click [here](https://github.com/Xeift/Kizmeow-Telegram-Discord-Bot/archive/refs/heads/main.zip) to download zip first.
-
-2. Unzip the file and run CLI.exe. If you are familiar with python, you can run CLI.py too.
-
-3. Before we run CLI.py, we need to obtain below data first:
+2. Double click to run CLI.exe. Below are the explanation of the params:
 
 |       Name                           | Description | Required | Example |
 |--------------------------------------|-------------|----------|---------|
@@ -39,7 +37,7 @@ Usage
 | FORWARD_IMAGE                        | Forward/don't message with image                                                                                 |    ❌   | 1 |
 | ONLY_PLAINTEXT                       | Remove any other multimedia, only forward plaintext                                                              |    ❌   | 1 |
 
-The gif table below shows the steps to get these parameters.
+The table below shows the steps to get these parameters.
 
 |               Parameter Name               |                                 How to get the parameter?                                 |
 |--------------------------------------------|-------------------------------------------------------------------------------------------|
