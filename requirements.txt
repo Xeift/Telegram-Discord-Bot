@@ -3,3 +3,4 @@ beautifulsoup4==4.12.3
 requests==2.32.3
 audioop-lts==0.2.1
 python-dotenv==1.1.0
+google-genai>=1.21.1

@@ -7,6 +7,9 @@ import requests
 from bs4 import BeautifulSoup
 from discord import Embed, SyncWebhook
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -15,6 +18,8 @@ class CustomError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class TranslationSchema(BaseModel):
+    translated_content: str
 
 try:
     DC_WEBHOOK_URL = os.getenv('DC_WEBHOOK_URL') or str(input('[DC_WEBHOOK_URL] Enter Discord webhook url: '))
@@ -47,6 +52,12 @@ try:
 
     ONLY_PLAINTEXT = os.getenv('ONLY_PLAINTEXT') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[ONLY_PLAINTEXT] Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
     if ONLY_PLAINTEXT != '1' and ONLY_PLAINTEXT != '': raise CustomError('[ONLY_PLAINTEXT] You should input 1 or leave it blank.')
+
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[GEMINI_API_KEY] Enter your Google Gemini API key if you wish to translate the content to your local language (leave blank if you don't need to translate): "))
+    TRANSLATION_PROMPT: str
+    if GEMINI_API_KEY is not None:
+        TRANSLATION_PROMPT = os.getenv('TRANSLATION_PROMPT') if os.getenv('TRANSLATION_PROMPT') is not None else str(input("[TRANSLATION_PROMPT] Enter the prompt for translation. For example: <Users will input a segment of English text. Please translate it naturally into Traditional Chinese (zh-TW) using expressions commonly used in Taiwan, and send only the translated text. Note: Do not send anything other than the translation. Do not modify any line breaks or Markdown symbols present in the original text.>"))
+        if TRANSLATION_PROMPT is None: raise CustomError('[TRANSLATION_PROMPT] Missing TRANSLATION_PROMPT. If you want to disable the translation function, please leave GEMINI_API_KEY blank.') 
 
     CHECK_MESSAGE_EVERY_N_SEC = os.getenv('CHECK_MESSAGE_EVERY_N_SEC') or input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): ')
     CHECK_MESSAGE_EVERY_N_SEC = int(CHECK_MESSAGE_EVERY_N_SEC)
@@ -167,7 +178,33 @@ def keywordFilter(msg_text):
         return contain_keyword
 
     return True
+
+def translate(original_text):
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    model = "gemini-2.0-flash-lite"
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(text=original_text),
+            ],
+        ),
+    ]
+    generate_content_config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=TranslationSchema,
+        system_instruction=[
+            types.Part.from_text(text="""使用者會輸入一段文字，請你用臺灣人慣用的用於將其自然的翻譯成繁體中文（zh-TW）並且傳送譯文。請注意：除了譯文以外，不要傳送任何其他東西。原文裡面有的換行和各種 Markdown 符號請勿更動。"""),
+        ],
+    )
+
+    response = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    )
     
+    return response.parsed.translated_content   
 
 def sendMessage(msg_link, msg_text, msg_image):
     webhook = SyncWebhook.from_url(DC_WEBHOOK_URL)
@@ -177,7 +214,9 @@ def sendMessage(msg_link, msg_text, msg_image):
 
     embed = Embed(title='', color=EMBED_COLOR)
 
-    if msg_text != None: embed.description = msg_text
+    if msg_text != None:
+        if GEMINI_API_KEY is not None: msg_text = translate(msg_text)
+        embed.description = msg_text
     if msg_image != None and ONLY_PLAINTEXT != '1': embed.set_image(url=msg_image)
     if EMBED_TITLE_SETTING == '2': embed.title = 'Forward From Telegram'
     if EMBED_TITLE_SETTING == '3': embed.title = 'Original Telegram Link'; embed.url = msg_link
