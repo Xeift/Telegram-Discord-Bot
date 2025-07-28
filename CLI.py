@@ -84,6 +84,8 @@ print(f'EMBED_COLOR: {EMBED_COLOR}')
 print(f'EMBED_HYPERLINK_SETTING: {EMBED_TITLE_SETTING}')
 print(f'KEYWORD_FILTER_OPTION: {KEYWORD_FILTER_OPTION}')
 print(f'KEYWORD_FILTER_BANK: {KEYWORD_FILTER_BANK}')
+print(f'GEMINI_API_KEY: {GEMINI_API_KEY}')
+print(f'TRANSLATION_PROMPT: {TRANSLATION_PROMPT}')
 print(f'CHECK_MESSAGE_EVERY_N_SEC: {CHECK_MESSAGE_EVERY_N_SEC}')
 print(f'CONTENT_TEXT: {CONTENT_TEXT}')
 print('----------------------------------------------------------------')
@@ -194,7 +196,7 @@ def translate(original_text):
         response_mime_type="application/json",
         response_schema=TranslationSchema,
         system_instruction=[
-            types.Part.from_text(text="""使用者會輸入一段文字，請你用臺灣人慣用的用於將其自然的翻譯成繁體中文（zh-TW）並且傳送譯文。請注意：除了譯文以外，不要傳送任何其他東西。原文裡面有的換行和各種 Markdown 符號請勿更動。"""),
+            types.Part.from_text(text=TRANSLATION_PROMPT),
         ],
     )
 
