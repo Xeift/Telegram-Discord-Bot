@@ -37,7 +37,7 @@ try:
     EMBED_TITLE_SETTING = os.getenv('EMBED_TITLE_SETTING') or str(input('[EMBED_TITLE_SETTING] Embed title setting. No title(1), title hyperlink off(2), title hyperlink on(3), enter 1, 2 or 3: '))
     if EMBED_TITLE_SETTING != '1' and EMBED_TITLE_SETTING != '2' and EMBED_TITLE_SETTING != '3': raise CustomError('[EMBED_TITLE_SETTING] A valid title hyperlink setting should be 1, 2 or 3.')
 
-    KEYWORD_FILTER_OPTION = os.getenv('KEYWORD_FILTER_OPTION') if os.getenv('KEYWORD_FILTER_OPTION') is not None else str(input("[KEYWORD_FILTER_OPTION] Only forward message contains(1) / not cointains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
+    KEYWORD_FILTER_OPTION = os.getenv('KEYWORD_FILTER_OPTION') if os.getenv('KEYWORD_FILTER_OPTION') is not None else str(input("[KEYWORD_FILTER_OPTION] Only forward message contains(1) / not contains(2) certain keyword, enter 1 or 2 (leave blank if you want to forward all message): "))
     KEYWORD_FILTER_BANK = []
     if KEYWORD_FILTER_OPTION == '':
         pass
@@ -47,16 +47,18 @@ try:
         KEYWORD_FILTER_BANK = str(input('[KEYWORD_FILTER_BANK] Enter your keywords, separate by comma if you have multiple keywords (e.g. ant,bear,cat): ')).split(',')
         KEYWORD_FILTER_BANK = [s.strip() for s in KEYWORD_FILTER_BANK]
 
-    FORWARD_IMAGE = os.getenv('FORWARD_IMAGE') or str(input("[FORWARD_IMAGE] Forward message with image(1), don't forward message image(2), enter 1 or 2: "))
+    FORWARD_IMAGE = os.getenv('FORWARD_IMAGE') or str(input("[FORWARD_IMAGE] Forward message with image(1), don't forward message with image(2), enter 1 or 2: "))
     if FORWARD_IMAGE != '1' and FORWARD_IMAGE != '2': raise CustomError('[FORWARD_IMAGE] You should input 1 or 2.')
 
     ONLY_PLAINTEXT = os.getenv('ONLY_PLAINTEXT') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[ONLY_PLAINTEXT] Remove any other multimedia, only forward plaintext, enter 1 if want only plaintext (leave blank if you want to forward normal multimedia): "))
     if ONLY_PLAINTEXT != '1' and ONLY_PLAINTEXT != '': raise CustomError('[ONLY_PLAINTEXT] You should input 1 or leave it blank.')
 
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') if os.getenv('ONLY_PLAINTEXT') is not None else str(input("[GEMINI_API_KEY] Enter your Google Gemini API key if you wish to translate the content to your local language (leave blank if you don't need to translate): "))
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') if os.getenv('GEMINI_API_KEY') is not None else str(input("[GEMINI_API_KEY] Enter your Google Gemini API key if you wish to translate the content to your local language (leave blank if you don't need to translate): "))
     TRANSLATION_PROMPT: str
     if GEMINI_API_KEY is not None:
-        TRANSLATION_PROMPT = os.getenv('TRANSLATION_PROMPT') if os.getenv('TRANSLATION_PROMPT') is not None else str(input("[TRANSLATION_PROMPT] Enter the prompt for translation. For example: <Users will input a segment of English text. Please translate it naturally into Traditional Chinese (zh-TW) using expressions commonly used in Taiwan, and send only the translated text. Note: Do not send anything other than the translation. Do not modify any line breaks or Markdown symbols present in the original text.>"))
+        MODEL = os.getenv('MODEL') or str(input('[MODEL] Enter the model name you want to use. Example: gemini-2.5-flash-lite : '))
+        if MODEL is None: raise CustomError('[MODEL] Missing MODEL. If you want to disable the translation function, please leave GEMINI_API_KEY blank.') 
+        TRANSLATION_PROMPT = os.getenv('TRANSLATION_PROMPT') if os.getenv('TRANSLATION_PROMPT') is not None else str(input("[TRANSLATION_PROMPT] Enter the prompt for translation. For example: <Users will input a segment of English text. Please translate it naturally into Traditional Chinese (zh-TW) using expressions commonly used in Taiwan, and send only the translated text. Note: Do not send anything other than the translation. Do not modify any line breaks or Markdown symbols present in the original text.> : "))
         if TRANSLATION_PROMPT is None: raise CustomError('[TRANSLATION_PROMPT] Missing TRANSLATION_PROMPT. If you want to disable the translation function, please leave GEMINI_API_KEY blank.') 
 
     CHECK_MESSAGE_EVERY_N_SEC = os.getenv('CHECK_MESSAGE_EVERY_N_SEC') or input('[CHECK_MESSAGE_EVERY_N_SEC] How many seconds you want the script to check new message (recommend 20, if you set it to 0.05 your IP may temporarily banned by Telegram): ')
@@ -183,7 +185,7 @@ def keywordFilter(msg_text):
 
 def translate(original_text):
     client = genai.Client(api_key=GEMINI_API_KEY)
-    model = "gemini-2.0-flash-lite"
+    model = MODEL
     contents = [
         types.Content(
             role="user",
