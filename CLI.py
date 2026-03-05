@@ -55,7 +55,7 @@ try:
 
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') if os.getenv('GEMINI_API_KEY') is not None else str(input("[GEMINI_API_KEY] Enter your Google Gemini API key if you wish to translate the content to your local language (leave blank if you don't need to translate): "))
     TRANSLATION_PROMPT: str
-    if GEMINI_API_KEY is not None:
+    if GEMINI_API_KEY not in [None, '']:
         MODEL = os.getenv('MODEL') or str(input('[MODEL] Enter the model name you want to use. Example: gemini-2.5-flash-lite : '))
         if MODEL is None: raise CustomError('[MODEL] Missing MODEL. If you want to disable the translation function, please leave GEMINI_API_KEY blank.') 
         TRANSLATION_PROMPT = os.getenv('TRANSLATION_PROMPT') if os.getenv('TRANSLATION_PROMPT') is not None else str(input("[TRANSLATION_PROMPT] Enter the prompt for translation. For example: <Users will input a segment of English text. Please translate it naturally into Traditional Chinese (zh-TW) using expressions commonly used in Taiwan, and send only the translated text. Note: Do not send anything other than the translation. Do not modify any line breaks or Markdown symbols present in the original text.> : "))
@@ -86,8 +86,6 @@ print(f'EMBED_COLOR: {EMBED_COLOR}')
 print(f'EMBED_HYPERLINK_SETTING: {EMBED_TITLE_SETTING}')
 print(f'KEYWORD_FILTER_OPTION: {KEYWORD_FILTER_OPTION}')
 print(f'KEYWORD_FILTER_BANK: {KEYWORD_FILTER_BANK}')
-print(f'GEMINI_API_KEY: {GEMINI_API_KEY}')
-print(f'TRANSLATION_PROMPT: {TRANSLATION_PROMPT}')
 print(f'CHECK_MESSAGE_EVERY_N_SEC: {CHECK_MESSAGE_EVERY_N_SEC}')
 print(f'CONTENT_TEXT: {CONTENT_TEXT}')
 print('----------------------------------------------------------------')
@@ -219,7 +217,7 @@ def sendMessage(msg_link, msg_text, msg_image):
     embed = Embed(title='', color=EMBED_COLOR)
 
     if msg_text != None:
-        if GEMINI_API_KEY is not None: msg_text = translate(msg_text)
+        if GEMINI_API_KEY not in [None, '']: msg_text = translate(msg_text)
         embed.description = msg_text
     if msg_image != None and ONLY_PLAINTEXT != '1': embed.set_image(url=msg_image)
     if EMBED_TITLE_SETTING == '2': embed.title = 'Forward From Telegram'
