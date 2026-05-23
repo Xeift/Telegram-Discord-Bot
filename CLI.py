@@ -130,13 +130,13 @@ FIELDS = (
     ),
     FieldDefinition(
         "check_message_every_n_sec",
-        "Poll interval",
+        "Check new messages every",
         "20",
         default="20",
     ),
     FieldDefinition(
         "content_text",
-        "Content prefix",
+        "Message above embed",
         "",
     ),
 )
@@ -164,6 +164,14 @@ def field_groups() -> list[tuple[str, list[FieldDefinition]]]:
         groups[-1][1].append(field)
 
     return groups
+
+
+def field_by_key(fields: list[FieldDefinition], key: str) -> FieldDefinition:
+    for field in fields:
+        if field.key == key:
+            return field
+
+    raise CustomError(f"[{key}] Missing field definition.")
 
 
 def field_pairs(fields: list[FieldDefinition]) -> list[list[FieldDefinition]]:
@@ -599,37 +607,25 @@ class SetupScreen(Screen):
                 yield Static("Settings", classes="panel-title")
                 for section, fields in field_groups():
                     yield Static(section, classes="section-title")
-                    for pair in field_pairs(fields):
-                        with Horizontal(classes="field-row"):
-                            for field in pair:
-                                with Vertical(classes="field-cell"):
-                                    yield Label(field.label, classes="field-label")
-                                    if field.options:
-                                        with Horizontal(classes="option-row"):
-                                            for index, option in enumerate(
-                                                field.options
-                                            ):
-                                                label, value = option
-                                                option_id = f"{field.key}_{index}"
-                                                self.option_lookup[option_id] = (
-                                                    field.key,
-                                                    value,
-                                                )
-                                                classes = "option-button"
-                                                if self.values[field.key] == value:
-                                                    classes += " selected"
-                                                yield Button(
-                                                    label,
-                                                    id=option_id,
-                                                    classes=classes,
-                                                )
-                                    else:
-                                        yield Input(
-                                            value=self.values[field.key],
-                                            placeholder=field.placeholder,
-                                            password=field.password,
-                                            id=field.key,
-                                        )
+                    if section == "Connection":
+                        with Horizontal(classes="connection-flow"):
+                            yield from self.compose_field(
+                                field_by_key(fields, "tg_announcement_channel"),
+                                classes="connection-node",
+                            )
+                            yield Static("->", classes="connection-arrow")
+                            yield from self.compose_field(
+                                field_by_key(fields, "dc_webhook_url"),
+                                classes="connection-node",
+                            )
+                    else:
+                        for pair in field_pairs(fields):
+                            with Horizontal(classes="field-row"):
+                                for field in pair:
+                                    yield from self.compose_field(
+                                        field,
+                                        classes="field-cell",
+                                    )
             with Vertical(id="setup-aside"):
                 yield Static("Config", classes="panel-title")
                 yield Static(str(get_config_path()), id="config-path")
@@ -645,6 +641,34 @@ class SetupScreen(Screen):
             self.back()
         elif event.button.id in self.option_lookup:
             self.select_option(event.button.id)
+
+    def compose_field(self, field: FieldDefinition, classes: str):
+        with Vertical(classes=classes):
+            yield Label(field.label, classes="field-label")
+            if field.options:
+                with Horizontal(classes="option-row"):
+                    for index, option in enumerate(field.options):
+                        label, value = option
+                        option_id = f"{field.key}_{index}"
+                        self.option_lookup[option_id] = (
+                            field.key,
+                            value,
+                        )
+                        option_classes = "option-button"
+                        if self.values[field.key] == value:
+                            option_classes += " selected"
+                        yield Button(
+                            label,
+                            id=option_id,
+                            classes=option_classes,
+                        )
+            else:
+                yield Input(
+                    value=self.values[field.key],
+                    placeholder=field.placeholder,
+                    password=field.password,
+                    id=field.key,
+                )
 
     def collect_values(self) -> dict[str, str]:
         values: dict[str, str] = {}
@@ -837,6 +861,24 @@ class TelegramDiscordTUI(App):
     .field-label {
         margin-top: 0;
         color: #788395;
+    }
+
+    .connection-flow {
+        height: 5;
+        margin-bottom: 1;
+    }
+
+    .connection-node {
+        width: 1fr;
+        height: 5;
+    }
+
+    .connection-arrow {
+        width: 6;
+        height: 5;
+        content-align: center middle;
+        color: #2dd4bf;
+        text-style: bold;
     }
 
     .field-row {
