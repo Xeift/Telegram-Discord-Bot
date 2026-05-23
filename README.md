@@ -1,5 +1,5 @@
 # Telegram-Discord-Bot
-A bot that forwards Telegram messages to Discord via webhook. It does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url.
+A TUI bot that forwards Telegram messages to Discord via webhook. It does not require any Discord or Telegram permissions, nor does it require adding any bots to Telegram group, the only thing required is the Discord webhook url.
 
 The bot is under development, it only forward text messages and images currently. 
 
@@ -19,23 +19,44 @@ What's the difference between Kizmeow and other existing bots?
 
 Usage
 -----------------
-## For Windows User
-1. Go to the [release page](https://github.com/Xeift/Telegram-Discord-Bot/releases) and download CLI.exe.
+1. Install dependencies:
 
-2. Double click to run CLI.exe. Below are the explanation of the params:
+```bash
+python -m pip install -r requirements.txt
+```
 
-|       Name                           | Description | Required | Example |
-|--------------------------------------|-------------|----------|---------|
-| DC_WEBHOOK_URL                       | The Discord webhook you got in Discord channel                                                                   |    ✔    | https://discord.com/api/webhooks/1322806255961509930/Bhz0Q2mv6rz9gXclYAFSl7tvbqdhhbEr3no6WY6o-fWwa6rp5Mg8t_EbtvIjnuR6lb3u |
-| TG_ANNOUNCEMENT_CHANNEL              | The link of the public Telegram announcement channel. Public group, private group, private channel will not work |    ✔    | https://t.me/dsafdsfa3243 |
-| EMBED_COLOR                          | The color of the forwarded Discord embed message                                                                 |    ✔    | 0xe8006f |
-| EMBED_TITLE_SETTING                  | The title style of the forwarded Discord embed message                                                           |    ❌   | 1 |
-| KEYWORD_FILTER_OPTION                | Useful when you want to filter some message with/without specific keywords                                       |    ✔    | 2 |
-| KEYWORD_FILTER_BANK                  | The words you want to filter                                                                                     |    (✔)  | ant,bear,cat |
-| CHECK_MESSAGE_EVERY_N_SEC            | How many seconds you want the script to check new message                                                        |    ✔    | 20 |
-| CONTENT_TEXT                         | Add custom content text above the embed                                                                          |    ❌   | This message is forward from Telegram =w= |
-| FORWARD_IMAGE                        | Forward/don't message with image                                                                                 |    ❌   | 1 |
-| ONLY_PLAINTEXT                       | Remove any other multimedia, only forward plaintext                                                              |    ❌   | 1 |
+2. Start the terminal UI:
+
+```bash
+python CLI.py
+```
+
+3. Review the configuration form and press `Start`. Values from `.env` are loaded into the form automatically. Press `Stop` to stop forwarding, or press `q` to quit the TUI.
+
+For Docker, run the container with an interactive terminal:
+
+```bash
+docker build -t telegram-discord-bot .
+docker run --rm -it --env-file .env telegram-discord-bot
+```
+
+Below are the configuration fields:
+
+| Name | Description | Required | Example |
+|------|-------------|----------|---------|
+| DC_WEBHOOK_URL | The Discord webhook you got in Discord channel | Yes | https://discord.com/api/webhooks/1322806255961509930/Bhz0Q2mv6rz9gXclYAFSl7tvbqdhhbEr3no6WY6o-fWwa6rp5Mg8t_EbtvIjnuR6lb3u |
+| TG_ANNOUNCEMENT_CHANNEL | The link of the public Telegram announcement channel. Public group, private group, private channel will not work | Yes | https://t.me/dsafdsfa3243 |
+| EMBED_COLOR | The color of the forwarded Discord embed message | Yes | 0xe8006f |
+| EMBED_TITLE_SETTING | The title style of the forwarded Discord embed message: 1 no title, 2 plain title, 3 title link | Yes | 3 |
+| KEYWORD_FILTER_OPTION | Blank forwards all messages, 1 forwards messages containing keywords, 2 forwards messages not containing keywords | No | 2 |
+| KEYWORD_FILTER_BANK | The words you want to filter, separated by comma. Required when KEYWORD_FILTER_OPTION is 1 or 2 | No | ant,bear,cat |
+| FORWARD_IMAGE | Forward messages with image: 1 yes, 2 no | Yes | 1 |
+| ONLY_PLAINTEXT | Remove multimedia and only forward plaintext: 1 yes, blank no | No | 1 |
+| GEMINI_API_KEY | Google Gemini API key. Leave blank to disable translation | No | AIza... |
+| MODEL | Gemini model. Required when GEMINI_API_KEY is set | No | gemini-2.5-flash-lite |
+| TRANSLATION_PROMPT | Translation prompt. Required when GEMINI_API_KEY is set | No | Please translate it naturally into English (en-US) |
+| CHECK_MESSAGE_EVERY_N_SEC | How many seconds the bot waits between checks | Yes | 20 |
+| CONTENT_TEXT | Add custom content text above the embed | No | This message is forward from Telegram =w= |
 
 The table below shows the steps to get these parameters.
 
