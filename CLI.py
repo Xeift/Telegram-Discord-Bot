@@ -1,30 +1,38 @@
 from __future__ import annotations
 
 import datetime
-import os
+import json
 import re
+import sys
 import threading
 from dataclasses import dataclass
+from pathlib import Path
 from queue import Empty, Queue
 from typing import Callable
 
 import requests
 from bs4 import BeautifulSoup
 from discord import Embed, SyncWebhook
-from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.screen import Screen
 from textual.widgets import Button, Input, Label, RichLog, Static
-
-load_dotenv()
 
 
 class CustomError(Exception):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class ConfigFileError(CustomError):
+    pass
+
+
+class ConfigMissingError(ConfigFileError):
+    pass
 
 
 class TranslationSchema(BaseModel):
@@ -34,80 +42,100 @@ class TranslationSchema(BaseModel):
 @dataclass(frozen=True)
 class FieldDefinition:
     key: str
-    env_name: str
     label: str
     placeholder: str = ""
     password: bool = False
+    default: str = ""
+    options: tuple[tuple[str, str], ...] = ()
 
 
 FIELDS = (
     FieldDefinition(
         "dc_webhook_url",
-        "DC_WEBHOOK_URL",
         "Discord webhook",
         "https://discord.com/api/webhooks/...",
         True,
     ),
     FieldDefinition(
         "tg_announcement_channel",
-        "TG_ANNOUNCEMENT_CHANNEL",
         "Telegram channel",
         "https://t.me/example_channel",
     ),
-    FieldDefinition("embed_color", "EMBED_COLOR", "Embed color", "0xe8006f"),
+    FieldDefinition(
+        "embed_color",
+        "Embed color",
+        "0xe8006f",
+        default="0xe8006f",
+    ),
     FieldDefinition(
         "embed_title_setting",
-        "EMBED_TITLE_SETTING",
         "Title mode",
-        "1 none, 2 title, 3 link",
+        default="3",
+        options=(
+            ("None", "1"),
+            ("Title", "2"),
+            ("Link", "3"),
+        ),
     ),
     FieldDefinition(
         "keyword_filter_option",
-        "KEYWORD_FILTER_OPTION",
         "Keyword mode",
-        "blank all, 1 include, 2 exclude",
+        default="",
+        options=(
+            ("All", ""),
+            ("Include", "1"),
+            ("Exclude", "2"),
+        ),
     ),
     FieldDefinition(
         "keyword_filter_bank",
-        "KEYWORD_FILTER_BANK",
         "Keywords",
         "ant,bear,cat",
     ),
     FieldDefinition(
         "forward_image",
-        "FORWARD_IMAGE",
         "Images",
-        "1 forward, 2 skip",
+        default="1",
+        options=(
+            ("Forward", "1"),
+            ("Skip", "2"),
+        ),
     ),
     FieldDefinition(
         "only_plaintext",
-        "ONLY_PLAINTEXT",
         "Plaintext only",
-        "blank off, 1 on",
+        default="",
+        options=(
+            ("Off", ""),
+            ("On", "1"),
+        ),
     ),
     FieldDefinition(
         "gemini_api_key",
-        "GEMINI_API_KEY",
         "Gemini key",
         "",
         True,
     ),
-    FieldDefinition("model", "MODEL", "Gemini model", "gemini-2.5-flash-lite"),
+    FieldDefinition(
+        "model",
+        "Gemini model",
+        "gemini-2.5-flash-lite",
+        default="gemini-2.5-flash-lite",
+    ),
     FieldDefinition(
         "translation_prompt",
-        "TRANSLATION_PROMPT",
         "Prompt",
         "Please translate it naturally into English (en-US)",
+        default="Please translate it naturally into English (en-US)",
     ),
     FieldDefinition(
         "check_message_every_n_sec",
-        "CHECK_MESSAGE_EVERY_N_SEC",
         "Poll interval",
         "20",
+        default="20",
     ),
     FieldDefinition(
         "content_text",
-        "CONTENT_TEXT",
         "Content prefix",
         "",
     ),
@@ -120,6 +148,98 @@ SECTION_BEFORE_FIELD = {
     "gemini_api_key": "Translation",
     "check_message_every_n_sec": "Runtime",
 }
+
+CONFIG_FILE_NAME = "config.json"
+CONFIG_VERSION = 1
+
+
+def field_groups() -> list[tuple[str, list[FieldDefinition]]]:
+    groups: list[tuple[str, list[FieldDefinition]]] = []
+
+    for field in FIELDS:
+        section = SECTION_BEFORE_FIELD.get(field.key)
+        if section is not None:
+            groups.append((section, []))
+
+        groups[-1][1].append(field)
+
+    return groups
+
+
+def field_pairs(fields: list[FieldDefinition]) -> list[list[FieldDefinition]]:
+    return [fields[index : index + 2] for index in range(0, len(fields), 2)]
+
+
+def get_config_path() -> Path:
+    if getattr(sys, "frozen", False):
+        app_dir = Path(sys.executable).resolve().parent
+    else:
+        app_dir = Path(__file__).resolve().parent
+
+    return app_dir / CONFIG_FILE_NAME
+
+
+def default_values() -> dict[str, str]:
+    return {field.key: field.default for field in FIELDS}
+
+
+def require_config_value_map(data: object) -> dict[str, str]:
+    if not isinstance(data, dict):
+        raise ConfigFileError("[config.json] Config should be a JSON object.")
+
+    version = data.get("version")
+    if version != CONFIG_VERSION:
+        raise ConfigFileError(
+            f"[config.json] Expected version {CONFIG_VERSION}, got {version!r}."
+        )
+
+    values: dict[str, str] = {}
+    for field in FIELDS:
+        if field.key not in data:
+            raise ConfigFileError(f"[config.json] Missing {field.key}.")
+
+        value = data[field.key]
+        if not isinstance(value, str):
+            raise ConfigFileError(f"[config.json] {field.key} should be a string.")
+        values[field.key] = value
+
+    return values
+
+
+def load_config_values() -> dict[str, str]:
+    config_path = get_config_path()
+    if not config_path.exists():
+        raise ConfigMissingError(f"[config.json] Missing {config_path}.")
+
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ConfigFileError(f"[config.json] Invalid JSON: {error}") from error
+    except OSError as error:
+        raise ConfigFileError(
+            f"[config.json] Cannot read {config_path}: {error}"
+        ) from error
+
+    values = require_config_value_map(data)
+    BotConfig.from_values(values)
+    return values
+
+
+def save_config_values(values: dict[str, str]):
+    BotConfig.from_values(values)
+    payload = {"version": CONFIG_VERSION}
+    payload.update({field.key: values[field.key] for field in FIELDS})
+
+    config_path = get_config_path()
+    try:
+        config_path.write_text(
+            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    except OSError as error:
+        raise ConfigFileError(
+            f"[config.json] Cannot write {config_path}: {error}"
+        ) from error
 
 
 @dataclass(frozen=True)
@@ -460,6 +580,197 @@ class TelegramDiscordBot:
 BOT_THREAD_STOPPED = object()
 
 
+class SetupScreen(Screen):
+    def __init__(
+        self,
+        values: dict[str, str],
+        can_go_back: bool,
+        message: str = "",
+    ):
+        super().__init__()
+        self.values = dict(values)
+        self.can_go_back = can_go_back
+        self.message = message
+        self.option_lookup: dict[str, tuple[str, str]] = {}
+
+    def compose(self) -> ComposeResult:
+        with Horizontal(id="setup-main"):
+            with VerticalScroll(id="setup-panel"):
+                yield Static("Settings", classes="panel-title")
+                for section, fields in field_groups():
+                    yield Static(section, classes="section-title")
+                    for pair in field_pairs(fields):
+                        with Horizontal(classes="field-row"):
+                            for field in pair:
+                                with Vertical(classes="field-cell"):
+                                    yield Label(field.label, classes="field-label")
+                                    if field.options:
+                                        with Horizontal(classes="option-row"):
+                                            for index, option in enumerate(
+                                                field.options
+                                            ):
+                                                label, value = option
+                                                option_id = f"{field.key}_{index}"
+                                                self.option_lookup[option_id] = (
+                                                    field.key,
+                                                    value,
+                                                )
+                                                classes = "option-button"
+                                                if self.values[field.key] == value:
+                                                    classes += " selected"
+                                                yield Button(
+                                                    label,
+                                                    id=option_id,
+                                                    classes=classes,
+                                                )
+                                    else:
+                                        yield Input(
+                                            value=self.values[field.key],
+                                            placeholder=field.placeholder,
+                                            password=field.password,
+                                            id=field.key,
+                                        )
+            with Vertical(id="setup-aside"):
+                yield Static("Config", classes="panel-title")
+                yield Static(str(get_config_path()), id="config-path")
+                yield Static(self.message, id="setup-message")
+                with Horizontal(id="actions"):
+                    yield Button("Save", id="save")
+                    yield Button("Back", id="back")
+
+    def on_button_pressed(self, event: Button.Pressed):
+        if event.button.id == "save":
+            self.save()
+        elif event.button.id == "back":
+            self.back()
+        elif event.button.id in self.option_lookup:
+            self.select_option(event.button.id)
+
+    def collect_values(self) -> dict[str, str]:
+        values: dict[str, str] = {}
+        for field in FIELDS:
+            if field.options:
+                values[field.key] = self.values[field.key]
+            else:
+                widget = self.query_one(f"#{field.key}", Input)
+                values[field.key] = widget.value
+
+        return values
+
+    def select_option(self, option_id: str):
+        field_key, selected_value = self.option_lookup[option_id]
+        self.values[field_key] = selected_value
+
+        for button_id, option in self.option_lookup.items():
+            option_field_key, _ = option
+            if option_field_key != field_key:
+                continue
+
+            button = self.query_one(f"#{button_id}", Button)
+            if button_id == option_id:
+                button.add_class("selected")
+            else:
+                button.remove_class("selected")
+
+    def save(self):
+        values = self.collect_values()
+        try:
+            config = BotConfig.from_values(values)
+            save_config_values(values)
+        except CustomError as error:
+            self.query_one("#setup-message", Static).update(str(error))
+            return
+
+        app = self.app
+        app.config_values = values
+        app.bot_config = config
+        if self.can_go_back:
+            app.pop_screen()
+            app.refresh_main_screen()
+        else:
+            app.switch_screen(MainScreen())
+
+    def back(self):
+        if self.can_go_back:
+            self.app.pop_screen()
+        else:
+            self.app.exit()
+
+
+class MainScreen(Screen):
+    def compose(self) -> ComposeResult:
+        with Horizontal(id="main"):
+            with Vertical(id="overview-panel"):
+                yield Static("Overview", classes="panel-title")
+                yield Static("", id="summary")
+                with Horizontal(id="actions"):
+                    yield Button("Start", id="start")
+                    stop_button = Button("Stop", id="stop")
+                    stop_button.disabled = True
+                    yield stop_button
+                with Horizontal(id="actions-secondary"):
+                    yield Button("Settings", id="settings")
+                    yield Button("Exit", id="exit")
+            with Vertical(id="runtime-panel"):
+                yield Static("Status: stopped", id="status")
+                yield RichLog(id="log", wrap=True, highlight=True)
+
+    def on_mount(self):
+        self.refresh_config()
+        self.refresh_runtime_state()
+        self.write_log("Ready. Press Start to begin forwarding.")
+
+    def on_button_pressed(self, event: Button.Pressed):
+        if event.button.id == "start":
+            self.app.start_bot()
+        elif event.button.id == "stop":
+            self.app.stop_bot()
+        elif event.button.id == "settings":
+            self.app.open_settings()
+        elif event.button.id == "exit":
+            self.app.action_quit_app()
+
+    def refresh_config(self):
+        config = self.app.bot_config
+        if config is None:
+            self.query_one("#summary", Static).update("No saved config.")
+            return
+
+        filter_mode = {
+            "": "off",
+            "1": "include keywords",
+            "2": "exclude keywords",
+        }[config.keyword_filter_option]
+        image_mode = "forward" if config.forward_image == "1" else "skip"
+        plaintext_mode = "on" if config.only_plaintext == "1" else "off"
+        translation_mode = "on" if config.gemini_api_key else "off"
+        summary = "\n".join(
+            [
+                f"Channel       t.me/{config.tg_announcement_channel}",
+                f"Interval      {config.check_interval_seconds:g}s",
+                f"Images        {image_mode}",
+                f"Plaintext     {plaintext_mode}",
+                f"Filter        {filter_mode}",
+                f"Translation   {translation_mode}",
+                f"Config        {get_config_path()}",
+            ]
+        )
+        self.query_one("#summary", Static).update(summary)
+
+    def refresh_runtime_state(self):
+        is_running = self.app.is_bot_running()
+        self.query_one("#start", Button).disabled = is_running
+        self.query_one("#stop", Button).disabled = not is_running
+        self.query_one("#settings", Button).disabled = is_running
+
+    def set_status(self, message: str):
+        self.query_one("#status", Static).update(message)
+
+    def write_log(self, message: str):
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        self.query_one("#log", RichLog).write(f"[{timestamp}] {message}")
+
+
 class TelegramDiscordTUI(App):
     TITLE = "Telegram Discord Bot"
     CSS = """
@@ -469,40 +780,35 @@ class TelegramDiscordTUI(App):
         color: #d7dde7;
     }
 
-    #topbar {
-        height: 3;
-        padding: 0 2;
-        background: #0d1118;
-    }
-
-    #brand {
-        width: 1fr;
-        content-align: left middle;
-        color: #f4f7fb;
-        text-style: bold;
-    }
-
-    #hint {
-        width: auto;
-        content-align: right middle;
-        color: #6f7a8c;
-    }
-
-    #main {
+    #main,
+    #setup-main {
         height: 1fr;
         padding: 1 2 1 2;
         background: #090b10;
     }
 
-    #config-panel {
-        width: 54;
-        min-width: 46;
+    #setup-panel {
+        width: 1fr;
         padding: 0 2 1 0;
         background: #090b10;
         border: none;
         scrollbar-background: #090b10;
         scrollbar-color: #252d3b;
         scrollbar-color-hover: #343f51;
+    }
+
+    #setup-aside {
+        width: 44;
+        min-width: 36;
+        padding: 0 0 1 2;
+        background: #090b10;
+    }
+
+    #overview-panel {
+        width: 40;
+        min-width: 36;
+        padding: 0 2 1 0;
+        background: #090b10;
     }
 
     #runtime-panel {
@@ -517,6 +823,11 @@ class TelegramDiscordTUI(App):
         margin: 0 0 1 0;
     }
 
+    .meta-line {
+        color: #5f6b7d;
+        margin: 0 0 1 0;
+    }
+
     .section-title {
         margin: 1 0 0 0;
         color: #2dd4bf;
@@ -528,9 +839,19 @@ class TelegramDiscordTUI(App):
         color: #788395;
     }
 
+    .field-row {
+        height: 5;
+        margin-bottom: 1;
+    }
+
+    .field-cell {
+        width: 1fr;
+        height: 5;
+        margin-right: 1;
+    }
+
     Input {
         height: 3;
-        margin-bottom: 1;
         padding: 0 1;
         background: #111722;
         color: #d7dde7;
@@ -542,15 +863,45 @@ class TelegramDiscordTUI(App):
         border: tall #2dd4bf;
     }
 
-    Input:disabled {
-        background: #0f141d;
-        color: #5c6676;
-        border: tall #0f141d;
+    .option-row {
+        height: 3;
     }
 
-    #actions {
+    #summary {
+        height: auto;
+        margin-bottom: 1;
+        padding: 1;
+        background: #0d1118;
+        color: #b8c2d2;
+        border: tall #111722;
+    }
+
+    #config-path {
+        height: auto;
+        margin-bottom: 1;
+        padding: 1;
+        background: #0d1118;
+        color: #8b96a8;
+        border: tall #111722;
+    }
+
+    #setup-message {
+        min-height: 3;
+        margin-bottom: 1;
+        padding: 1;
+        background: #25131a;
+        color: #fda4af;
+        border: tall #3a1b26;
+    }
+
+    #actions,
+    #actions-secondary {
         height: 3;
         margin-top: 0;
+    }
+
+    #actions-secondary {
+        margin-top: 1;
     }
 
     Button {
@@ -558,29 +909,66 @@ class TelegramDiscordTUI(App):
         height: 3;
         margin-right: 1;
         text-style: bold;
+        background: #111722;
+        color: #d7dde7;
         border: tall #171d28;
     }
 
+    .option-button {
+        width: 1fr;
+        min-width: 8;
+        margin-right: 1;
+        background: #111722;
+        color: #8b96a8;
+        border: tall #111722;
+    }
+
+    .option-button:hover {
+        background: #151d2a;
+        color: #d7dde7;
+        border: tall #2d3748;
+    }
+
+    .option-button:focus {
+        border: tall #2dd4bf;
+    }
+
+    .option-button.selected {
+        background: #123b38;
+        color: #e6fffb;
+        border: tall #2dd4bf;
+    }
+
+    #save,
     #start {
         background: #2dd4bf;
         color: #06100e;
         border: tall #2dd4bf;
     }
 
+    #save:hover,
     #start:hover {
         background: #5eead4;
         border: tall #5eead4;
     }
 
-    #stop {
+    #stop,
+    #exit {
         background: #25131a;
         color: #fda4af;
         border: tall #3a1b26;
     }
 
-    #stop:hover {
+    #stop:hover,
+    #exit:hover {
         background: #3b1825;
         border: tall #7f1d35;
+    }
+
+    #back:hover,
+    #settings:hover {
+        background: #151d2a;
+        border: tall #2d3748;
     }
 
     Button:disabled {
@@ -610,86 +998,77 @@ class TelegramDiscordTUI(App):
 
     def __init__(self):
         super().__init__()
+        self.config_values = default_values()
+        self.bot_config: BotConfig | None = None
         self.log_queue: Queue[object] = Queue()
         self.stop_event: threading.Event | None = None
         self.bot_thread: threading.Thread | None = None
 
-    def compose(self) -> ComposeResult:
-        with Horizontal(id="topbar"):
-            yield Static("Telegram Discord Bot", id="brand")
-            yield Static("q quit", id="hint")
-        with Horizontal(id="main"):
-            with VerticalScroll(id="config-panel"):
-                yield Static("Settings", classes="panel-title")
-                for field in FIELDS:
-                    if field.key in SECTION_BEFORE_FIELD:
-                        yield Static(
-                            SECTION_BEFORE_FIELD[field.key],
-                            classes="section-title",
-                        )
-                    yield Label(field.label, classes="field-label")
-                    yield Input(
-                        value=os.getenv(field.env_name, ""),
-                        placeholder=field.placeholder,
-                        password=field.password,
-                        id=field.key,
-                    )
-                with Horizontal(id="actions"):
-                    yield Button("Start", variant="success", id="start")
-                    stop_button = Button("Stop", variant="error", id="stop")
-                    stop_button.disabled = True
-                    yield stop_button
-            with Vertical(id="runtime-panel"):
-                yield Static("Status: stopped", id="status")
-                yield RichLog(id="log", wrap=True, highlight=True)
-
     def on_mount(self):
         self.set_interval(0.25, self.drain_log_queue)
-        self.write_log("Ready. Review the configuration and press Start.")
-
-    def on_button_pressed(self, event: Button.Pressed):
-        if event.button.id == "start":
-            self.start_bot()
-        elif event.button.id == "stop":
-            self.stop_bot()
+        try:
+            self.config_values = load_config_values()
+            self.bot_config = BotConfig.from_values(self.config_values)
+        except ConfigMissingError:
+            self.push_screen(
+                SetupScreen(
+                    self.config_values,
+                    can_go_back=False,
+                    message="No config.json found. Save settings to create it.",
+                )
+            )
+        except CustomError as error:
+            self.push_screen(
+                SetupScreen(
+                    self.config_values,
+                    can_go_back=False,
+                    message=str(error),
+                )
+            )
+        else:
+            self.push_screen(MainScreen())
 
     def action_quit_app(self):
         self.stop_bot()
         self.exit()
 
+    def open_settings(self):
+        if self.is_bot_running():
+            self.set_main_status("Status: stop the bot before editing settings")
+            return
+
+        self.push_screen(SetupScreen(self.config_values, can_go_back=True))
+
     def start_bot(self):
         if self.bot_thread is not None and self.bot_thread.is_alive():
             return
 
-        try:
-            config = BotConfig.from_values(self.collect_values())
-        except CustomError as error:
-            self.set_status(f"Config error: {error}")
-            self.write_log(str(error))
+        if self.bot_config is None:
+            self.set_main_status("Status: missing config")
             return
 
         self.stop_event = threading.Event()
-        bot = TelegramDiscordBot(config, self.log_from_thread)
+        bot = TelegramDiscordBot(self.bot_config, self.log_from_thread)
         self.bot_thread = threading.Thread(
             target=self.run_bot_thread,
             args=(bot, self.stop_event),
             daemon=True,
         )
         self.bot_thread.start()
-        self.set_form_enabled(False)
-        self.set_status(
-            "Running: "
-            f"t.me/{config.tg_announcement_channel} "
-            f"every {config.check_interval_seconds:g}s"
+        self.set_main_status(
+            "Status: running "
+            f"t.me/{self.bot_config.tg_announcement_channel} "
+            f"every {self.bot_config.check_interval_seconds:g}s"
         )
+        self.refresh_main_screen()
 
     def stop_bot(self):
         if self.stop_event is None:
             return
 
         self.stop_event.set()
-        self.set_status("Stopping...")
-        self.query_one("#stop", Button).disabled = True
+        self.set_main_status("Status: stopping")
+        self.refresh_main_screen()
 
     def run_bot_thread(self, bot: TelegramDiscordBot, stop_event: threading.Event):
         try:
@@ -697,11 +1076,8 @@ class TelegramDiscordTUI(App):
         finally:
             self.log_queue.put(BOT_THREAD_STOPPED)
 
-    def collect_values(self) -> dict[str, str]:
-        return {
-            field.key: self.query_one(f"#{field.key}", Input).value
-            for field in FIELDS
-        }
+    def is_bot_running(self) -> bool:
+        return self.bot_thread is not None and self.bot_thread.is_alive()
 
     def log_from_thread(self, message: str):
         self.log_queue.put(message)
@@ -716,23 +1092,23 @@ class TelegramDiscordTUI(App):
             if item is BOT_THREAD_STOPPED:
                 self.bot_thread = None
                 self.stop_event = None
-                self.set_form_enabled(True)
-                self.set_status("Stopped")
+                self.set_main_status("Status: stopped")
+                self.refresh_main_screen()
             else:
                 self.write_log(str(item))
 
-    def set_form_enabled(self, enabled: bool):
-        for field in FIELDS:
-            self.query_one(f"#{field.key}", Input).disabled = not enabled
-        self.query_one("#start", Button).disabled = not enabled
-        self.query_one("#stop", Button).disabled = enabled
+    def refresh_main_screen(self):
+        if isinstance(self.screen, MainScreen):
+            self.screen.refresh_config()
+            self.screen.refresh_runtime_state()
 
-    def set_status(self, message: str):
-        self.query_one("#status", Static).update(message)
+    def set_main_status(self, message: str):
+        if isinstance(self.screen, MainScreen):
+            self.screen.set_status(message)
 
     def write_log(self, message: str):
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        self.query_one("#log", RichLog).write(f"[{timestamp}] {message}")
+        if isinstance(self.screen, MainScreen):
+            self.screen.write_log(message)
 
 
 if __name__ == "__main__":

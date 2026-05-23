@@ -31,32 +31,29 @@ python -m pip install -r requirements.txt
 python CLI.py
 ```
 
-3. Review the configuration form and press `Start`. Values from `.env` are loaded into the form automatically. Press `Stop` to stop forwarding, or press `q` to quit the TUI.
+3. On the first launch, the app opens the settings page because `config.json` does not exist yet. Fill in the fields and press `Save`.
 
-For Docker, run the container with an interactive terminal:
+4. After a valid `config.json` exists, the app starts on the main page. Press `Start` to begin forwarding, `Stop` to stop forwarding, `Settings` to edit saved config, or `Exit` to quit.
 
-```bash
-docker build -t telegram-discord-bot .
-docker run --rm -it --env-file .env telegram-discord-bot
-```
+The config file is saved next to the running app. When running from source, it is saved next to `CLI.py`. When running as a packaged binary on Windows, macOS, or Linux, it is saved next to that binary. If that folder is not writable, move the app to a writable folder before saving settings.
 
 Below are the configuration fields:
 
 | Name | Description | Required | Example |
 |------|-------------|----------|---------|
-| DC_WEBHOOK_URL | The Discord webhook you got in Discord channel | Yes | https://discord.com/api/webhooks/1322806255961509930/Bhz0Q2mv6rz9gXclYAFSl7tvbqdhhbEr3no6WY6o-fWwa6rp5Mg8t_EbtvIjnuR6lb3u |
-| TG_ANNOUNCEMENT_CHANNEL | The link of the public Telegram announcement channel. Public group, private group, private channel will not work | Yes | https://t.me/dsafdsfa3243 |
-| EMBED_COLOR | The color of the forwarded Discord embed message | Yes | 0xe8006f |
-| EMBED_TITLE_SETTING | The title style of the forwarded Discord embed message: 1 no title, 2 plain title, 3 title link | Yes | 3 |
-| KEYWORD_FILTER_OPTION | Blank forwards all messages, 1 forwards messages containing keywords, 2 forwards messages not containing keywords | No | 2 |
-| KEYWORD_FILTER_BANK | The words you want to filter, separated by comma. Required when KEYWORD_FILTER_OPTION is 1 or 2 | No | ant,bear,cat |
-| FORWARD_IMAGE | Forward messages with image: 1 yes, 2 no | Yes | 1 |
-| ONLY_PLAINTEXT | Remove multimedia and only forward plaintext: 1 yes, blank no | No | 1 |
-| GEMINI_API_KEY | Google Gemini API key. Leave blank to disable translation | No | AIza... |
-| MODEL | Gemini model. Required when GEMINI_API_KEY is set | No | gemini-2.5-flash-lite |
-| TRANSLATION_PROMPT | Translation prompt. Required when GEMINI_API_KEY is set | No | Please translate it naturally into English (en-US) |
-| CHECK_MESSAGE_EVERY_N_SEC | How many seconds the bot waits between checks | Yes | 20 |
-| CONTENT_TEXT | Add custom content text above the embed | No | This message is forward from Telegram =w= |
+| dc_webhook_url | The Discord webhook you got in Discord channel | Yes | https://discord.com/api/webhooks/1322806255961509930/Bhz0Q2mv6rz9gXclYAFSl7tvbqdhhbEr3no6WY6o-fWwa6rp5Mg8t_EbtvIjnuR6lb3u |
+| tg_announcement_channel | The link of the public Telegram announcement channel. Public group, private group, private channel will not work | Yes | https://t.me/dsafdsfa3243 |
+| embed_color | The color of the forwarded Discord embed message | Yes | 0xe8006f |
+| embed_title_setting | The title style of the forwarded Discord embed message: 1 no title, 2 plain title, 3 title link | Yes | 3 |
+| keyword_filter_option | Blank forwards all messages, 1 forwards messages containing keywords, 2 forwards messages not containing keywords | No | 2 |
+| keyword_filter_bank | The words you want to filter, separated by comma. Required when keyword_filter_option is 1 or 2 | No | ant,bear,cat |
+| forward_image | Forward messages with image: 1 yes, 2 no | Yes | 1 |
+| only_plaintext | Remove multimedia and only forward plaintext: 1 yes, blank no | No | 1 |
+| gemini_api_key | Google Gemini API key. Leave blank to disable translation | No | AIza... |
+| model | Gemini model. Required when gemini_api_key is set | No | gemini-2.5-flash-lite |
+| translation_prompt | Translation prompt. Required when gemini_api_key is set | No | Please translate it naturally into English (en-US) |
+| check_message_every_n_sec | How many seconds the bot waits between checks | Yes | 20 |
+| content_text | Add custom content text above the embed | No | This message is forward from Telegram =w= |
 
 The table below shows the steps to get these parameters.
 
@@ -82,8 +79,8 @@ Yes. This script does *not* works in group(private/public), channel(private). Th
 </details>
 
 <details>
-<summary>I don't want to enter the cofig evertime I start the script. Does it support .env?</summary>
-Yes. You can create a .env file and put the cofig in it. See [.env.example](https://github.com/Xeift/Telegram-Discord-Bot/blob/main/.env.example) for actual format and fields. 
+<summary>I don't want to enter the config every time I start the script. Does it save settings?</summary>
+Yes. The TUI saves settings to `config.json` next to the running app. This file contains your Discord webhook and Gemini API key in plaintext, so do not share it.
 </details>
 
 Note
