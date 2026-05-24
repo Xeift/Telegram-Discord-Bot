@@ -35,6 +35,27 @@ python CLI.py
 
 4. After a valid `config.json` exists, the app starts on the main page. Press `Start` to begin forwarding, `Stop` to stop forwarding, `Settings` to edit saved config, or `Exit` to quit.
 
+5. To run in the background without the terminal UI after `config.json` exists:
+
+```bash
+python CLI.py --headless
+```
+
+This is the same as:
+
+```bash
+python CLI.py --headless start
+```
+
+Check or stop the background process:
+
+```bash
+python CLI.py --headless status
+python CLI.py --headless stop
+```
+
+Headless mode loads the same `config.json`, starts forwarding immediately, writes runtime logs to `telegram-discord-bot.log`, and tracks the background process in `telegram-discord-bot.pid`.
+
 The config file is saved next to the running app. When running from source, it is saved next to `CLI.py`. When running as a packaged binary on Windows, macOS, or Linux, it is saved next to that binary. If that folder is not writable, move the app to a writable folder before saving settings.
 
 Below are the configuration fields:

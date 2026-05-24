@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
+import os
 import re
+import signal
+import subprocess
 import sys
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from queue import Empty, Queue
@@ -151,6 +156,9 @@ SECTION_BEFORE_FIELD = {
 
 CONFIG_FILE_NAME = "config.json"
 CONFIG_VERSION = 1
+HEADLESS_PID_FILE_NAME = "telegram-discord-bot.pid"
+HEADLESS_LOG_FILE_NAME = "telegram-discord-bot.log"
+HEADLESS_STOP_TIMEOUT_SECONDS = 30
 
 
 def wrap_dashboard_url(url: str, chunk_size: int = 90) -> str:
@@ -184,13 +192,23 @@ def field_pairs(fields: list[FieldDefinition]) -> list[list[FieldDefinition]]:
     return [fields[index : index + 2] for index in range(0, len(fields), 2)]
 
 
-def get_config_path() -> Path:
+def get_app_dir() -> Path:
     if getattr(sys, "frozen", False):
-        app_dir = Path(sys.executable).resolve().parent
-    else:
-        app_dir = Path(__file__).resolve().parent
+        return Path(sys.executable).resolve().parent
 
-    return app_dir / CONFIG_FILE_NAME
+    return Path(__file__).resolve().parent
+
+
+def get_config_path() -> Path:
+    return get_app_dir() / CONFIG_FILE_NAME
+
+
+def get_headless_pid_path() -> Path:
+    return get_app_dir() / HEADLESS_PID_FILE_NAME
+
+
+def get_headless_log_path() -> Path:
+    return get_app_dir() / HEADLESS_LOG_FILE_NAME
 
 
 def default_values() -> dict[str, str]:
@@ -1277,5 +1295,220 @@ class TelegramDiscordTUI(App):
             self.screen.write_log(message)
 
 
-if __name__ == "__main__":
+def print_headless_log(message: str):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}", flush=True)
+
+
+def get_headless_run_command() -> list[str]:
+    if getattr(sys, "frozen", False):
+        return [str(Path(sys.executable).resolve()), "--headless", "run"]
+
+    return [sys.executable, str(Path(__file__).resolve()), "--headless", "run"]
+
+
+def read_headless_pid() -> int | None:
+    pid_path = get_headless_pid_path()
+    if not pid_path.exists():
+        return None
+
+    try:
+        pid_text = pid_path.read_text(encoding="utf-8").strip()
+    except OSError as error:
+        raise CustomError(f"[{pid_path.name}] Cannot read pid file: {error}") from error
+
+    try:
+        return int(pid_text)
+    except ValueError as error:
+        raise CustomError(f"[{pid_path.name}] Invalid pid file.") from error
+
+
+def remove_headless_pid():
+    pid_path = get_headless_pid_path()
+    try:
+        pid_path.unlink()
+    except FileNotFoundError:
+        return
+
+
+def is_process_running(pid: int) -> bool:
+    if pid <= 0:
+        return False
+
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+    return True
+
+
+def validate_headless_config() -> None:
+    config_values = load_config_values()
+    BotConfig.from_values(config_values)
+
+
+def run_headless_foreground() -> int:
+    try:
+        config_values = load_config_values()
+        bot_config = BotConfig.from_values(config_values)
+    except CustomError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    stop_event = threading.Event()
+
+    def stop_from_signal(_signum, _frame):
+        stop_event.set()
+
+    signal.signal(signal.SIGINT, stop_from_signal)
+    signal.signal(signal.SIGTERM, stop_from_signal)
+
+    bot = TelegramDiscordBot(bot_config, print_headless_log)
+    bot.run(stop_event)
+    return 0
+
+
+def start_headless() -> int:
+    try:
+        existing_pid = read_headless_pid()
+    except CustomError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    if existing_pid is not None:
+        if is_process_running(existing_pid):
+            print(f"Headless bot is already running. PID: {existing_pid}")
+            return 0
+        remove_headless_pid()
+
+    try:
+        validate_headless_config()
+    except CustomError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    log_path = get_headless_log_path()
+    try:
+        with log_path.open("ab") as log_file:
+            process = subprocess.Popen(
+                get_headless_run_command(),
+                cwd=str(get_app_dir()),
+                stdin=subprocess.DEVNULL,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                close_fds=True,
+                start_new_session=True,
+            )
+    except OSError as error:
+        print(
+            f"[headless] Cannot start background process: {error}",
+            file=sys.stderr,
+        )
+        return 1
+
+    pid_path = get_headless_pid_path()
+    try:
+        pid_path.write_text(f"{process.pid}\n", encoding="utf-8")
+    except OSError as error:
+        os.kill(process.pid, signal.SIGTERM)
+        print(f"[headless] Cannot write {pid_path}: {error}", file=sys.stderr)
+        return 1
+
+    print(f"Started headless bot. PID: {process.pid}")
+    print(f"Log: {log_path}")
+    return 0
+
+
+def stop_headless() -> int:
+    try:
+        pid = read_headless_pid()
+    except CustomError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    if pid is None:
+        print("Headless bot is not running.")
+        return 0
+
+    if not is_process_running(pid):
+        remove_headless_pid()
+        print("Headless bot is not running. Removed stale pid file.")
+        return 0
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError as error:
+        print(f"[headless] Cannot stop PID {pid}: {error}", file=sys.stderr)
+        return 1
+
+    deadline = time.monotonic() + HEADLESS_STOP_TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        if not is_process_running(pid):
+            remove_headless_pid()
+            print(f"Stopped headless bot. PID: {pid}")
+            return 0
+        time.sleep(0.2)
+
+    print(f"Stop signal sent to PID {pid}, but the process is still running.")
+    return 1
+
+
+def show_headless_status() -> int:
+    try:
+        pid = read_headless_pid()
+    except CustomError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    if pid is None:
+        print("Headless bot is not running.")
+        return 0
+
+    if is_process_running(pid):
+        print(f"Headless bot is running. PID: {pid}")
+        print(f"Log: {get_headless_log_path()}")
+        return 0
+
+    print(
+        "Headless bot is not running, "
+        f"but pid file exists: {get_headless_pid_path()}"
+    )
+    return 1
+
+
+def run_headless_command(command: str) -> int:
+    if command == "start":
+        return start_headless()
+    if command == "stop":
+        return stop_headless()
+    if command == "status":
+        return show_headless_status()
+    if command == "run":
+        return run_headless_foreground()
+
+    raise CustomError(f"[headless] Unknown command: {command}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Telegram Discord Bot")
+    parser.add_argument(
+        "--headless",
+        nargs="?",
+        choices=("start", "stop", "status", "run"),
+        const="start",
+        help="Manage the headless background bot. Defaults to start.",
+    )
+    args = parser.parse_args(argv)
+
+    if args.headless is not None:
+        return run_headless_command(args.headless)
+
     TelegramDiscordTUI().run()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

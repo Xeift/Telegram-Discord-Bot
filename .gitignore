@@ -132,3 +132,4 @@ dmypy.json
 
 # App config with local secrets
 config.json
+telegram-discord-bot.pid
