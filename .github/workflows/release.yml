@@ -19,15 +19,19 @@ jobs:
           - runner: ubuntu-24.04
             artifact_name: Telegram-Discord-Bot-linux-x64
             archive_name: Telegram-Discord-Bot-linux-x64.tar.gz
+            executable_asset_name: Telegram-Discord-Bot-linux-x64
           - runner: windows-2025
             artifact_name: Telegram-Discord-Bot-windows-x64
             archive_name: Telegram-Discord-Bot-windows-x64.zip
+            executable_asset_name: Telegram-Discord-Bot-windows-x64.exe
           - runner: macos-15-intel
             artifact_name: Telegram-Discord-Bot-macos-x64
             archive_name: Telegram-Discord-Bot-macos-x64.tar.gz
+            executable_asset_name: Telegram-Discord-Bot-macos-x64
           - runner: macos-15
             artifact_name: Telegram-Discord-Bot-macos-arm64
             archive_name: Telegram-Discord-Bot-macos-arm64.tar.gz
+            executable_asset_name: Telegram-Discord-Bot-macos-arm64
 
     steps:
       - name: Check out source
@@ -52,6 +56,8 @@ jobs:
           mkdir -p "release/${{ matrix.artifact_name }}"
           cp "dist/Telegram-Discord-Bot" "release/${{ matrix.artifact_name }}/"
           cp README.md LICENSE "release/${{ matrix.artifact_name }}/"
+          cp "dist/Telegram-Discord-Bot" "${{ matrix.executable_asset_name }}"
+          chmod +x "${{ matrix.executable_asset_name }}"
           tar -czf "${{ matrix.archive_name }}" -C release "${{ matrix.artifact_name }}"
 
       - name: Package Windows artifact
@@ -61,13 +67,16 @@ jobs:
           New-Item -ItemType Directory -Force "release/${{ matrix.artifact_name }}"
           Copy-Item "dist/Telegram-Discord-Bot.exe" "release/${{ matrix.artifact_name }}/"
           Copy-Item README.md, LICENSE "release/${{ matrix.artifact_name }}/"
+          Copy-Item "dist/Telegram-Discord-Bot.exe" "${{ matrix.executable_asset_name }}"
           Compress-Archive -Path "release/${{ matrix.artifact_name }}" -DestinationPath "${{ matrix.archive_name }}" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ matrix.archive_name }}
-          path: ${{ matrix.archive_name }}
+          name: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.archive_name }}
+            ${{ matrix.executable_asset_name }}
           if-no-files-found: error
 
   release:
