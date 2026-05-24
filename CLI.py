@@ -153,6 +153,12 @@ CONFIG_FILE_NAME = "config.json"
 CONFIG_VERSION = 1
 
 
+def wrap_dashboard_url(url: str, chunk_size: int = 90) -> str:
+    return "\n".join(
+        url[index : index + chunk_size] for index in range(0, len(url), chunk_size)
+    )
+
+
 def field_groups() -> list[tuple[str, list[FieldDefinition]]]:
     groups: list[tuple[str, list[FieldDefinition]]] = []
 
@@ -629,7 +635,8 @@ class SetupScreen(Screen):
             with Vertical(id="setup-aside"):
                 yield Static("Config", classes="panel-title")
                 yield Static(str(get_config_path()), id="config-path")
-                yield Static(self.message, id="setup-message")
+                message_classes = "" if self.message else "hidden"
+                yield Static(self.message, id="setup-message", classes=message_classes)
                 with Horizontal(id="actions"):
                     yield Button("Save", id="save")
                     yield Button("Back", id="back")
@@ -702,7 +709,9 @@ class SetupScreen(Screen):
             config = BotConfig.from_values(values)
             save_config_values(values)
         except CustomError as error:
-            self.query_one("#setup-message", Static).update(str(error))
+            setup_message = self.query_one("#setup-message", Static)
+            setup_message.update(str(error))
+            setup_message.remove_class("hidden")
             return
 
         app = self.app
@@ -723,20 +732,38 @@ class SetupScreen(Screen):
 
 class MainScreen(Screen):
     def compose(self) -> ComposeResult:
-        with Horizontal(id="main"):
-            with Vertical(id="overview-panel"):
-                yield Static("Overview", classes="panel-title")
-                yield Static("", id="summary")
-                with Horizontal(id="actions"):
-                    yield Button("Start", id="start")
-                    stop_button = Button("Stop", id="stop")
-                    stop_button.disabled = True
-                    yield stop_button
-                with Horizontal(id="actions-secondary"):
-                    yield Button("Settings", id="settings")
-                    yield Button("Exit", id="exit")
-            with Vertical(id="runtime-panel"):
-                yield Static("Status: stopped", id="status")
+        with Vertical(id="main"):
+            with Horizontal(id="dashboard"):
+                with Vertical(id="forwarding-panel"):
+                    yield Static("Forwarding", classes="panel-title")
+                    with Vertical(id="forwarding-surface"):
+                        with Horizontal(id="flow-row"):
+                            with Vertical(id="telegram-node", classes="flow-node"):
+                                yield Static("Telegram channel", classes="flow-label")
+                                yield Static("", id="telegram-url", classes="flow-url")
+                            yield Static("->", id="flow-arrow")
+                            with Vertical(id="discord-node", classes="flow-node"):
+                                yield Static("Discord webhook", classes="flow-label")
+                                yield Static("", id="discord-url", classes="flow-url")
+                        yield Static("", id="runtime-summary")
+                with Vertical(id="controls-panel"):
+                    yield Static("Controls", classes="panel-title")
+                    with Vertical(id="controls-surface"):
+                        yield Static("", id="status", classes="hidden")
+                        with Horizontal(id="actions"):
+                            yield Button(
+                                "Start",
+                                id="run-toggle",
+                                classes="control-button run-button",
+                            )
+                            yield Button(
+                                "Settings",
+                                id="settings",
+                                classes="control-button",
+                            )
+                            yield Button("Exit", id="exit", classes="control-button")
+            with Vertical(id="log-panel"):
+                yield Static("Runtime log", classes="panel-title")
                 yield RichLog(id="log", wrap=True, highlight=True)
 
     def on_mount(self):
@@ -745,10 +772,11 @@ class MainScreen(Screen):
         self.write_log("Ready. Press Start to begin forwarding.")
 
     def on_button_pressed(self, event: Button.Pressed):
-        if event.button.id == "start":
-            self.app.start_bot()
-        elif event.button.id == "stop":
-            self.app.stop_bot()
+        if event.button.id == "run-toggle":
+            if self.app.is_bot_running():
+                self.app.stop_bot()
+            else:
+                self.app.start_bot()
         elif event.button.id == "settings":
             self.app.open_settings()
         elif event.button.id == "exit":
@@ -757,7 +785,9 @@ class MainScreen(Screen):
     def refresh_config(self):
         config = self.app.bot_config
         if config is None:
-            self.query_one("#summary", Static).update("No saved config.")
+            self.query_one("#telegram-url", Static).update("")
+            self.query_one("#discord-url", Static).update("")
+            self.query_one("#runtime-summary", Static).update("No saved config.")
             return
 
         filter_mode = {
@@ -768,23 +798,34 @@ class MainScreen(Screen):
         image_mode = "forward" if config.forward_image == "1" else "skip"
         plaintext_mode = "on" if config.only_plaintext == "1" else "off"
         translation_mode = "on" if config.gemini_api_key else "off"
-        summary = "\n".join(
-            [
-                f"Channel       t.me/{config.tg_announcement_channel}",
-                f"Interval      {config.check_interval_seconds:g}s",
-                f"Images        {image_mode}",
-                f"Plaintext     {plaintext_mode}",
-                f"Filter        {filter_mode}",
-                f"Translation   {translation_mode}",
-                f"Config        {get_config_path()}",
-            ]
+        content_mode = "on" if config.content_text else "off"
+        runtime_summary = (
+            f"Every {config.check_interval_seconds:g}s | "
+            f"images {image_mode} | plaintext {plaintext_mode} | "
+            f"filter {filter_mode} | translation {translation_mode} | "
+            f"message above embed {content_mode}"
         )
-        self.query_one("#summary", Static).update(summary)
+        self.query_one("#telegram-url", Static).update(
+            wrap_dashboard_url(f"https://t.me/{config.tg_announcement_channel}", 30)
+        )
+        self.query_one("#discord-url", Static).update(
+            wrap_dashboard_url(config.dc_webhook_url, 76)
+        )
+        self.query_one("#runtime-summary", Static).update(runtime_summary)
 
     def refresh_runtime_state(self):
         is_running = self.app.is_bot_running()
-        self.query_one("#start", Button).disabled = is_running
-        self.query_one("#stop", Button).disabled = not is_running
+        is_stopping = self.app.stop_event is not None and self.app.stop_event.is_set()
+        run_button = self.query_one("#run-toggle", Button)
+        if is_stopping:
+            run_button.label = "Stopping"
+        elif is_running:
+            run_button.label = "Stop"
+        else:
+            run_button.label = "Start"
+
+        run_button.disabled = is_stopping
+        run_button.set_class(is_running, "running")
         self.query_one("#settings", Button).disabled = is_running
 
     def set_status(self, message: str):
@@ -828,17 +869,34 @@ class TelegramDiscordTUI(App):
         background: #090b10;
     }
 
-    #overview-panel {
-        width: 40;
-        min-width: 36;
-        padding: 0 2 1 0;
+    #main {
+        layout: vertical;
+    }
+
+    #dashboard {
+        height: 10;
+        margin-bottom: 1;
         background: #090b10;
     }
 
-    #runtime-panel {
+    #forwarding-panel {
         width: 1fr;
-        padding: 0 0 1 2;
-        background: #090b10;
+        padding-right: 2;
+    }
+
+    #controls-panel {
+        width: 46;
+    }
+
+    #controls-surface {
+        height: 8;
+        padding: 2 1 0 1;
+        background: #111722;
+        border: tall #151d2a;
+    }
+
+    #log-panel {
+        height: 1fr;
     }
 
     .panel-title {
@@ -909,13 +967,55 @@ class TelegramDiscordTUI(App):
         height: 3;
     }
 
-    #summary {
-        height: auto;
-        margin-bottom: 1;
-        padding: 1;
-        background: #0d1118;
+    #forwarding-surface {
+        height: 8;
+        padding: 0 1;
+        background: #111722;
         color: #b8c2d2;
-        border: tall #111722;
+        border: tall #151d2a;
+    }
+
+    #flow-row {
+        height: 6;
+    }
+
+    .flow-node {
+        height: 6;
+        padding: 0 1;
+        background: #0d1118;
+        border: tall #1d2735;
+    }
+
+    #telegram-node {
+        width: 34;
+    }
+
+    #discord-node {
+        width: 1fr;
+    }
+
+    .flow-label {
+        height: 1;
+        color: #2dd4bf;
+        text-style: bold;
+    }
+
+    .flow-url {
+        height: auto;
+        color: #cbd5e1;
+    }
+
+    #flow-arrow {
+        width: 6;
+        height: 6;
+        color: #2dd4bf;
+        text-style: bold;
+        content-align: center middle;
+    }
+
+    #runtime-summary {
+        height: 1;
+        color: #8b96a8;
     }
 
     #config-path {
@@ -936,6 +1036,10 @@ class TelegramDiscordTUI(App):
         border: tall #3a1b26;
     }
 
+    .hidden {
+        display: none;
+    }
+
     #actions,
     #actions-secondary {
         height: 3;
@@ -947,13 +1051,18 @@ class TelegramDiscordTUI(App):
     }
 
     Button {
-        min-width: 12;
+        min-width: 10;
         height: 3;
         margin-right: 1;
         text-style: bold;
         background: #111722;
         color: #d7dde7;
         border: tall #171d28;
+    }
+
+    .control-button {
+        width: 1fr;
+        min-width: 10;
     }
 
     .option-button {
@@ -982,29 +1091,44 @@ class TelegramDiscordTUI(App):
     }
 
     #save,
-    #start {
-        background: #2dd4bf;
-        color: #06100e;
+    #run-toggle {
+        background: #111722;
+        color: #5eead4;
         border: tall #2dd4bf;
     }
 
     #save:hover,
-    #start:hover {
-        background: #5eead4;
+    #run-toggle:hover {
+        background: #123b38;
+        color: #e6fffb;
         border: tall #5eead4;
     }
 
-    #stop,
-    #exit {
-        background: #25131a;
-        color: #fda4af;
-        border: tall #3a1b26;
+    #run-toggle.running {
+        color: #fb7185;
+        border: tall #7f1d35;
     }
 
-    #stop:hover,
-    #exit:hover {
-        background: #3b1825;
+    #run-toggle.running:hover {
+        background: #24151d;
+        color: #fb7185;
         border: tall #7f1d35;
+    }
+
+    #exit {
+        background: #111722;
+        color: #cbd5e1;
+        border: tall #171d28;
+    }
+
+    #exit:hover {
+        background: #24151d;
+        color: #fb7185;
+        border: tall #7f1d35;
+    }
+
+    Button:focus {
+        border: tall #2dd4bf;
     }
 
     #back:hover,
@@ -1020,12 +1144,12 @@ class TelegramDiscordTUI(App):
     }
 
     #status {
-        height: 3;
-        margin-bottom: 1;
-        padding: 1;
+        height: 1;
+        margin-bottom: 0;
+        padding: 0;
         background: #111722;
         color: #cbd5e1;
-        border: tall #111722;
+        content-align: left middle;
     }
 
     #log {
@@ -1033,7 +1157,7 @@ class TelegramDiscordTUI(App):
         padding: 1;
         background: #0d1118;
         color: #b8c2d2;
-        border: tall #111722;
+        border: tall #151d2a;
     }
     """
     BINDINGS = [("q", "quit_app", "Quit")]
@@ -1076,7 +1200,7 @@ class TelegramDiscordTUI(App):
 
     def open_settings(self):
         if self.is_bot_running():
-            self.set_main_status("Status: stop the bot before editing settings")
+            self.set_main_status("Running\nStop forwarding before editing settings.")
             return
 
         self.push_screen(SetupScreen(self.config_values, can_go_back=True))
@@ -1086,7 +1210,7 @@ class TelegramDiscordTUI(App):
             return
 
         if self.bot_config is None:
-            self.set_main_status("Status: missing config")
+            self.set_main_status("Missing config\nOpen Settings and save config.json.")
             return
 
         self.stop_event = threading.Event()
@@ -1098,9 +1222,9 @@ class TelegramDiscordTUI(App):
         )
         self.bot_thread.start()
         self.set_main_status(
-            "Status: running "
-            f"t.me/{self.bot_config.tg_announcement_channel} "
-            f"every {self.bot_config.check_interval_seconds:g}s"
+            "Running\n"
+            f"t.me/{self.bot_config.tg_announcement_channel}\n"
+            f"Every {self.bot_config.check_interval_seconds:g}s"
         )
         self.refresh_main_screen()
 
@@ -1109,7 +1233,7 @@ class TelegramDiscordTUI(App):
             return
 
         self.stop_event.set()
-        self.set_main_status("Status: stopping")
+        self.set_main_status("Stopping...")
         self.refresh_main_screen()
 
     def run_bot_thread(self, bot: TelegramDiscordBot, stop_event: threading.Event):
@@ -1134,7 +1258,7 @@ class TelegramDiscordTUI(App):
             if item is BOT_THREAD_STOPPED:
                 self.bot_thread = None
                 self.stop_event = None
-                self.set_main_status("Status: stopped")
+                self.set_main_status("Stopped")
                 self.refresh_main_screen()
             else:
                 self.write_log(str(item))
